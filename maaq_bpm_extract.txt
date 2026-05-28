@@ -1,0 +1,2315 @@
+ 
+UNIVERSIDAD NACIONAL AGRARIA DE LA SELVA 
+FACULTAD DE INGENIERÍA EN INFORMÁTICA Y SISTEMAS 
+ESCUELA PROFESIONAL DE INGENIERÍA EN INFORMÁTICA Y 
+SISTEMAS 
+ 
+ 
+  
+Gestión de Procesos de Negocios orientada a la organización ‘MAAQ S.A.C – Tingo María’ 
+ 
+Alumno:  Zelaya Albornoz, Anali Amy. 
+Curso: IS040601B - Gestión de Procesos de Negocios 
+Docente: Pozo Malpartida, Jorge Luis 
+Semestre: 2025 – II 
+Tingo María – Perú  
+
+ 
+ 
+Índice 
+I. Introducción ................................................................................................................ 9 
+1.1 Contextualización de la Organización .......................................................... 9 
+1.2 Problema de Investigación .......................................................................... 10 
+1.3 Objetivos ..................................................................................................... 11 
+1.3.1 Objetivo General ............................................................................... 11 
+1.3.2 Objetivos Específicos ........................................................................ 11 
+1.4 Alcance ........................................................................................................ 11 
+II. Revisión de literatura ................................................................................................ 13 
+2.1. Gestión de Procesos de Negocio (BPM) ..................................................... 13 
+2.1.1 Definición ....................................................................................... 13 
+2.1.2 Ciclo de Vida .................................................................................. 13 
+2.2. Modelos de Madurez de Procesos (BPMM) ............................................... 14 
+2.2.1 Niveles de Madurez BPM ................................................................. 14 
+2.3. Arquitectura de Procesos ............................................................................. 15 
+2.3.1 Clasificación de Procesos .................................................................. 15 
+2.4. Estándares de Modelado y Herramientas de Análisis ................................. 15 
+2.4.1 Business Process Model and Notation (BPMN) ............................... 15 
+2.4.2  Técnicas de Caracterización: Matriz 5W2H .................................... 16 
+III. Materiales y métodos ................................................................................................ 17 
+3.1 Materiales de estudio ................................................................................... 17 
+3.2 Metodología de trabajo ............................................................................... 17 
+IV. Resultados y discusión .............................................................................................. 19 
+4.1 Diagnóstico del estado actual (As-Is) ......................................................... 19 
+4.1.1 Arquitectura de Procesos ................................................................... 19 
+ 
+4.1.1.1 Diagrama de la Cadena de Valor ........................................ 19 
+4.1.1.2 Análisis del Flujo de Valor ................................................. 21 
+4.1.2 Identificación y Clasificación de Procesos (As-Is) ........................... 22 
+4.1.2.1 Inventario de procesos ......................................................... 22 
+4.1.2.2 Clasificación de Procesos .................................................... 22 
+4.1.2.3 Mapa de procesos ................................................................ 23 
+4.1.3 Evaluación y Priorización de Procesos ............................................. 25 
+4.1.3.1 Criterios de Evaluación ....................................................... 25 
+4.1.3.2 Matriz de Evaluación .......................................................... 26 
+4.1.4 Caracterización de Procesos Mediante Fichas Técnicas ................... 28 
+4.1.4.1 Fichas Técnicas de los procesos Estratégicos ..................... 29 
+4.1.4.2 Fichas Técnicas de los procesos Misionales ....................... 36 
+4.1.4.3 Fichas Técnicas de los procesos de Soporte ....................... 46 
+4.2 Diseño de la Reingeniería (To-Be) ................................................................... 54 
+4.2.1 Procesos Estratégicos ........................................................................ 54 
+4.2.2 Procesos Misionales .......................................................................... 55 
+4.2.3 Procesos de Soporte .......................................................................... 63 
+4.3 Arquitectura aplicando la Reingeniería de Procesos ........................................ 65 
+4.3.1. Diagrama de la Cadena de Valor Orientado a To-Be ....................... 66 
+4.3.2. Descripción de la Nueva Jerarquía de Procesos (To-Be) ................. 66 
+4.3.2.1 Clasificación de procesos en un modelo To-Be .................. 69 
+4.3.3. Mapa de Procesos Orientado a To-Be .............................................. 71 
+4.4 Discusión de Resultados ................................................................................... 73 
+V. Conclusiones ............................................................................................................. 75 
+VI. Recomendaciones ...................................................................................................... 76 
+VII. Referencias ................................................................................................................ 77 
+ 
+VIII. Anexos ....................................................................................................................... 78 
+8.1 Descripción de escenarios de ineficiencia (As-Is)¡Error! Marcador no 
+definido. 
+8.2 Descripción de procesos orientados a la reingeniería (To Be) ........... ¡Error! 
+Marcador no definido. 
+ 
+ 
+ 
+  
+ 
+Índice de Tablas 
+Tabla IV.1Inventario y Clasificación de Procesos de Constructora MAAQ S.A.C........... 23 
+Tabla IV.2Criterios de Salud del Proceso .......................................................................... 25 
+Tabla IV.3 Criterios de Importancia del Proceso ............................................................... 26 
+Tabla IV.4 Matriz de Evaluación de Procesos ................................................................... 26 
+Tabla IV.5 Ficha Técnica: Gestión Estratégica y Comercial ............................................. 29 
+Tabla IV.6 Ficha Técnica: Planeamiento Técnico ............................................................. 30 
+Tabla IV.7Matriz de 5W12H del proceso Elaboración de cronograma de obra ................ 31 
+Tabla IV.8 Matriz de 5W12H del proceso Elaboración de presupuesto de obra ............... 32 
+Tabla IV.9 Ficha Técnica: Gestión Comercial ................................................................... 33 
+Tabla IV.10 Matriz de 5W12H del proceso Gestión de licitaciones y convenios ............. 34 
+Tabla IV.11 Matriz de 5W12H del proceso Ejecución de campañas de marketing ........... 35 
+Tabla IV.12 Ficha Técnica: Gestión de Proyectos ............................................................. 36 
+Tabla IV.13 Ficha Técnica: Control de Ejecución ............................................................. 37 
+Tabla IV.14 Matriz de 5W12H del proceso Control de avance físico de obra .................. 38 
+Tabla IV.15 Matriz de 5W12H del proceso Gestión de cambios de ingeniería ................. 39 
+Tabla IV.16 Ficha Técnica: Gestión de Recursos de Obra ................................................ 40 
+Tabla IV.17 Matriz de 5W12H del proceso Asignación de equipos a proyectos .............. 41 
+Tabla IV.18 Ficha Técnica: Gestión de Logística .............................................................. 42 
+Tabla IV.19 Ficha Técnica: Logística de Obra .................................................................. 43 
+Tabla IV.20 Matriz de 5W12H del proceso Aprobación de requerimientos de materiales44 
+Tabla IV.21 Matriz de 5W12H del proceso Recepción de materiales en obra .................. 45 
+Tabla IV.22 Ficha Técnica: Gestión de Capital Humano .................................................. 46 
+Tabla IV.23 Ficha Técnica: Administración de Personal .................................................. 47 
+ 
+Tabla IV.24 Matriz de 5W12H del proceso Contratación de personal operativo .............. 48 
+Tabla IV.25 Matriz de 5W12H del proceso Renovación y liquidación de contratos ......... 49 
+Tabla IV.26 Ficha Técnica: Gestión Administrativa y Legal ............................................ 50 
+Tabla IV.27 Ficha Técnica: Cumplimiento y Riesgos ....................................................... 51 
+Tabla IV.28 Matriz de 5W12H del proceso Validación de antecedentes de proveedores . 52 
+Tabla IV.29 Matriz de 5W12H del proceso Validación de solvencia de clientes .............. 53 
+Tabla IV.30 Matriz de 5W12H del proceso Ejecución de campañas de marketing (To -Be)
+ ........................................................................................................................................................ 54 
+Tabla IV.31 Matriz de 5W12H del proceso Control de avance físico de obra (To-Be) .... 55 
+Tabla IV.32 Matriz de 5W12H del proceso Gestión de cambios de ingeniería (To-Be) ... 56 
+Tabla IV.33 Matriz de 5W12H del proceso Asignación de equipos a proyectos (To-Be) 57 
+Tabla IV.34 Matriz de 5W12H del proceso Aprobación de requerimientos de materiales 
+(To-Be) ........................................................................................................................................... 59 
+Tabla IV.35 Matriz de 5W12H del proceso Recepción de materiales en obra (To-Be) .... 61 
+Tabla IV.36 Matriz de 5W12H del proceso Validación de antecedentes de proveedores (To-
+Be) .................................................................................................................................................. 63 
+Tabla IV.37 Inventario y Clasificación de Procesos de Constructora MAAQ S.A.C.(To-Be)
+ ........................................................................................................................................................ 69 
+ 
+ 
+ 
+  
+ 
+Índice de figuras 
+Figura IV.1 Cadena de Valor de Constructora MAAQ S.A.C. .......................................... 20 
+Figura IV.2 Mapa de procesos ........................................................................................... 24 
+Figura IV.3 Diagrama de Dispersión ................................................................................. 27 
+Figura IV.4 BPMN del proceso Elaboración de cronograma de obra ............................... 31 
+Figura IV.5 BPMN de del proceso Elaboración de presupuesto de obra ........................... 32 
+Figura IV.6 BPMN de del proceso Gestión de licitaciones y convenios ........................... 34 
+Figura IV.7 BPMN de del proceso Ejecución de campañas de marketing ........................ 35 
+Figura IV.8 BPMN de del proceso Control de avance físico de obra ................................ 38 
+Figura IV.9 BPMN de del proceso Gestión de cambios de ingeniería .............................. 39 
+Figura IV.10 BPMN del proceso Asignación de equipos a proyectos ............................... 41 
+Figura IV.11 BPMN del proceso Aprobación de requerimientos de materiales ................ 44 
+Figura IV.12 BPMN del proceso Recepción de materiales en obra ................................... 45 
+Figura IV.13 BPMN del proceso Contratación de personal operativo .............................. 48 
+Figura IV.14 BPMN del proceso Renovación y liquidación de contratos ......................... 49 
+Figura IV.15 BPMN del proceso Validación de antecedentes de proveedores ................. 52 
+Figura IV.16 BPMN del proceso Validación de solvencia de clientes .............................. 53 
+Figura IV.17BPMN de del proceso Ejecución de campañas de marketing (To-Be) ......... 54 
+Figura IV.18 BPMN de del proceso Control de avance físico de obra (To-Be) ................ 55 
+Figura IV.19 BPMN de del proceso Gestión de cambios de ingeniería (To-Be) ............... 56 
+Figura IV.20 BPMN del proceso Asignación de equipos a proyectos (To-Be) ................. 58 
+Figura IV.21 BPMN del proceso Aprobación de requerimientos de materiales (To-Be) .. 60 
+Figura IV.22 BPMN del proceso Recepción de materiales en obra (To-Be) ..................... 62 
+Figura IV.23 BPMN del proceso Validación de antecedentes de proveedores (To-Be) .... 64 
+ 
+Figura IV.24 Cadena de Valor Orientado a To-Be ............................................................ 66 
+Figura IV.25 Mapa de Procesos To-Be: El futuro de MAAQ S.A.C. ................................ 71 
+ 
+  
+ 
+I. INTRODUCCIÓN 
+La Gestión de Procesos de Negocios (BPM, por sus siglas en inglés: Business Process 
+Management) se consolida como una disciplina estratégica esencial para la optimización y el 
+gobierno corporativo en el siglo XXI. Su implementación permite a las organizaci ones la 
+identificación, el diseño, la ejecución, la monitorización y la mejora continua de sus procesos, 
+asegurando la alineación operativa con los objetivos estratégicos. En el sector de la construcción, 
+caracterizado por proyectos de alta complejidad, va riabilidad en la ejecución y múltiples partes 
+interesadas (stakeholders), la aplicación de BPM es fundamental para mitigar riesgos, reducir 
+desviaciones presupuestarias y garantizar la competitividad. 
+ 
+En este marco, el presente estudio se enfoca en la Constructora MAAQ S.A.C. de Tingo 
+María, con el propósito de diagnosticar su estado actual de procesos (As -Is) e identificar las áreas 
+críticas de ineficiencia. Dicho análisis es un paso primordial del ciclo de vida de BPM y permitirá, 
+en etapas posteriores, proponer un modelo mejorado (To -Be) que eleve el nivel de madurez 
+organizacional de la empresa. 
+ 
+1.1 Contextualización de la Organización 
+Constructora MAAQ Arquitectos e Ingenieros S.A.C. es una Sociedad Anónima Cerrada 
+(S.A.C.) con domicilio en Tingo María, provincia de Leoncio Prado, Perú. La empresa se 
+especializa en la prestación de servicios integrales de arquitectura, ingeniería y construcción civil, 
+centrándose en el desarrollo de proyectos residenciales, comerciales e industriales de mediana 
+escala en la selva alta peruana. 
+ 
+La estructura organizativa de MAAQ S.A.C. es funcional, abarcando departamentos clave 
+como Gerencia General, Ingeniería y Operaciones (encargada de la ejecución de obra), y 
+Administración y Finanzas. La plantilla asciende aproximadamente a 20-30 colaboradores directos, 
+complementada con alianzas con subcontratistas y proveedores regionales. Si bien la organización 
+tiene un impacto positivo en el desarrollo de infraestructura local, el mercado regional se 
+caracteriza por la volatilidad en la cadena de sumini stro y la fuerte dependencia de la experiencia 
+individual de su equipo técnico. Según información proporcionada por la gerencia (2024), la falta 
+de estandarización en sus operaciones sugiere que la empresa opera actualmente en un Nivel de 
+ 
+Madurez Inicial (Ad-hoc), donde los procesos son intuitivos, reactivos y carecen de documentación 
+formal. 
+ 
+1.2 Problema de Investigación 
+El sector de la construcción a nivel regional peruano exhibe una alta susceptibilidad a la 
+ineficiencia operativa. Estudios como el de Zamora Cánovas (2016) indican que los costes por 
+naturaleza (materiales, mano de obra) constituyen la mayor parte del pre supuesto de obra, y su 
+gestión deficiente se traduce en sobrecostos y retrasos. En el caso específico de MAAQ S.A.C., el 
+diagnóstico preliminar y la observación directa revelan una fragmentación de los procesos 
+operativos clave, lo que se manifiesta en los siguientes síntomas de ineficiencia: 
+ 
+1. Variabilidad no controlada: Múltiples re -trabajos (rework) debido a errores en la 
+recepción y validación de materiales, así como inconsistencias en la comunicación de 
+órdenes de trabajo. 
+2. Dependencia individual: Los procesos se ejecutan basándose en el conocimiento tácito 
+y la experiencia individual del personal, lo que dificulta la delegación y la capacitación. 
+3. Falta de Trazabilidad: Ausencia de un sistema formal y centralizado para la 
+documentación y seguimiento de las actividades, resultando en un control reactivo y 
+tardío de las desviaciones. 
+4. Informalidad en la comunicación: Uso de canales no oficiales (WhatsApp) para la 
+gestión de requerimientos críticos. 
+5. Control subjetivo: Mediciones de avance físico y validación de proveedores basadas en 
+la confianza o la "vista", sin respaldo documental. 
+6. Pérdidas operativas: Mermas en almacén y tiempos muertos por falta de planificación 
+en la asignación de recursos. 
+ 
+Estos desafíos se enmarcan en la problemática general de las pymes constructoras 
+regionales que, como lo señala el INEI (2023), a menudo carecen de herramientas de gestión de 
+procesos que aseguren rentabilidad y sostenibilidad. En consecuencia, el problema de investigación 
+se formula de la siguiente manera: 
+ 
+ 
+¿Cómo el diseño de una reingeniería de procesos basada en el enfoque BPM (Business 
+Process Management) permitirá optimizar la gestión operativa, reducir la informalidad y elevar el 
+nivel de madurez organizacional de la Constructora MAAQ S.A.C.? 
+ 
+1.3 Objetivos 
+1.3.1 Objetivo General 
+Diagnosticar el estado actual (As -Is) y diseñar una propuesta de reingeniería de procesos 
+(To-Be) para la Constructora MAAQ S.A.C., aplicando estándares BPMN y matrices de 
+caracterización para optimizar la eficiencia operativa y el control interno. 
+ 
+1.3.2 Objetivos Específicos 
+1. Mapear y diagnosticar la arquitectura de procesos actual, identificando el nivel de 
+madurez y las ineficiencias críticas mediante matrices de priorización (Salud vs. 
+Importancia). 
+2. Modelar el estado actual (As -Is) de los procesos operativos, evidenciando las 
+desconexiones y puntos de dolor en la cadena de valor. 
+3. Diseñar la propuesta de mejora (To -Be) para los 7 procesos críticos seleccionados, 
+implementando controles digitales, validación formal y flujos de trabajo estandarizados 
+4. Proponer una nueva arquitectura empresarial, definiendo un Mapa de Procesos y una 
+Cadena de Valor orientados a la gestión por procesos y el uso de tecnología. 
+1.4 Alcance 
+El presente proyecto abarca el análisis y rediseño de los procesos operativos y de soporte 
+de Constructora MAAQ S.A.C. El estudio se delimita a las siguientes fases: 
+1. Diagnóstico Integral:  Levantamiento de información de todos los procesos de la 
+organización. 
+2. Focalización: Selección de los 7 procesos más críticos para su reingeniería, priorizados por 
+su impacto financiero y operativo: 
+o Estratégicos: Ejecución de campañas de marketing (P4). 
+ 
+o Misionales: Control de avance físico (P5), Gestión de cambios (P6), Asignación de 
+equipos (P7), Aprobación de requerimientos (P8) y Recepción de materiales (P9). 
+o Soporte: Validación de antecedentes de proveedores (P12). 
+3. Propuesta de Solución:  Desarrollo de Matrices 5W2H, diagramas BPMN To -Be y la 
+nueva estructura de procesos. 
+Exclusión: El proyecto llega hasta el nivel de diseño y propuesta (To -Be). La 
+implementación física, configuración de software ERP y la gestión del cambio organizacional 
+quedan fuera del alcance de este estudio académico. 
+  
+ 
+II. REVISIÓN DE LITERATURA 
+Esta revisión integra principios teóricos con la realidad operativa del sector construcción, 
+proporcionando la base conceptual para diagnosticar la ineficiencia, la variabilidad y el nivel de 
+madurez en organizaciones como Constructora MAAQ S.A.C 
+ 
+2.1. Gestión de Procesos de Negocio (BPM) 
+La Gestión de Procesos de Negocio (BPM) se ha consolidado como un paradigma de 
+gestión integral que trasciende la mera automatización de tareas. Según Díaz Piraquive (2008), el 
+BPM articula la estrategia empresarial con los procesos y la tecnología, permit iendo a las 
+organizaciones enfrentar entornos competitivos mediante parámetros de eficiencia y eficacia. En 
+el contexto de la construcción, donde la gestión tradicional suele fragmentarse por departamentos 
+(ingeniería, logística, finanzas), el BPM propone una visión transversal "de extremo a extremo" 
+(end-to-end), esencial para mitigar la desconexión entre la planificación de obra y la ejecución real. 
+ 
+2.1.1 Definición 
+BPM se define como el arte y la ciencia de supervisar cómo se realiza el trabajo en una 
+organización para asegurar resultados consistentes y aprovechar oportunidades de mejora (Dumas 
+et al., 2018). Weske (2024) amplía esta definición conceptualizándolo com o una disciplina que 
+combina métodos, técnicas y herramientas para diseñar, promulgar, controlar y analizar procesos 
+operativos. 
+Para una empresa constructora, la adopción de BPM implica transitar de una "gestión 
+funcional" (silos aislados) a una "gestión por procesos", donde el valor se mide por la capacidad 
+de entregar proyectos en tiempo y forma al cliente, minimizando los costes  por naturaleza —
+materiales y mano de obra— que representan la mayor carga presupuestal en este sector (Zamora 
+Cánovas, 2016). 
+ 
+2.1.2 Ciclo de Vida 
+El ciclo de vida de BPM proporciona la estructura metodológica para la mejora continua. 
+Dumas et al. (2018) establecen un ciclo iterativo cuyas fases iniciales son críticas para el presente 
+estudio: 
+ 
+1. Identificación de Procesos:  Fase donde se define la arquitectura empresarial y se 
+seleccionan los procesos problemáticos. 
+2. Descubrimiento (Modelado As -Is): Es la etapa central de este diagnóstico. Consiste en 
+documentar la realidad operativa "tal como es", sin idealizaciones. El objetivo es visibilizar 
+las ineficiencias, la variabilidad no controlada y las actividades que no agregan valor 
+(desperdicios), las cuales son comunes en entornos de baja madurez. 
+3. Análisis: Evaluación cualitativa y cuantitativa de las debilidades detectadas en el As-Is para 
+fundamentar el futuro rediseño (To-Be). 
+ 
+2.2. Modelos de Madurez de Procesos (BPMM) 
+La evaluación de la madurez es indispensable para ubicar a la organización en un estadio evolutivo 
+y trazar una ruta de mejora. Según Páez et al. (2018), los modelos de madurez permiten diagnosticar 
+las capacidades de una organización para gestionar sus procesos de manera definida y controlada. 
+2.2.1 Niveles de Madurez BPM 
+Diversos marcos de referencia, como el CMMI (Capability Maturity Model Integration) o 
+la norma ISO 9004, coinciden en describir una escala evolutiva. Para el caso de las pymes 
+constructoras en entornos regionales, es frecuente encontrar un Nivel 01 o Inicial (Ad-hoc). 
+Cruz y Lévano (2012) caracterizan este nivel inicial por la ausencia de estandarización: 
+• Imprevisibilidad: Los procesos cambian según la persona que los ejecuta; el éxito depende 
+de "héroes" individuales y no del sistema. 
+• Reactividad: La gestión se enfoca en "apagar fuegos" (resolver crisis diarias) en lugar de 
+prevenirlos. 
+• Falta de Documentación: No existen manuales formales o, si existen, no se siguen en la 
+práctica. 
+Este marco teórico valida la hipótesis de que las ineficiencias observadas en MAAQ S.A.C. 
+no son hechos aislados, sino síntomas sistémicos de una madurez incipiente que requiere 
+intervención urgente. 
+ 
+ 
+2.3. Arquitectura de Procesos  
+La arquitectura de procesos actúa como el plano estructural que organiza las actividades de 
+la empresa para alinearlas con su misión. Maldonado y Velázquez (2006) proponen un método 
+sistemático para definir esta arquitectura, partiendo de la identificación de flujos de información y 
+la relación entre unidades organizativas. 
+ 
+2.3.1 Clasificación de Procesos 
+Para facilitar el análisis y la priorización, la teoría BPM clasifica los procesos en tres 
+categorías jerárquicas: 
+1. Procesos Estratégicos:  Establecen la dirección y las metas a largo plazo ( por ejemplo  
+Gestión de Calidad, Planificación Estratégica). 
+2. Procesos Operativos (Misionales): Constituyen el core business y tienen impacto directo 
+en la satisfacción del cliente. En construcción, estos incluyen desde la logística de entrada 
+(Recepción de Materiales) hasta la ejecución de obra. Son, por definición, los candidatos 
+prioritarios para iniciativas de mejora debido a su alto impacto en la rentabilidad. 
+3. Procesos de Soporte: Proveen los recursos necesarios para que los operativos funcionen 
+(como Gestión de RR.HH., Mantenimiento de Equipos). 
+ 
+2.4. Estándares de Modelado y Herramientas de Análisis 
+La formalización de los procesos requiere un lenguaje común que elimine la ambigüedad 
+del lenguaje natural. 
+ 
+2.4.1 Business Process Model and Notation (BPMN) 
+El Business Process Model and Notation (BPMN) en su versión 2.0 se ha establecido como 
+el estándar internacional de facto  para el modelado de procesos, gestionado por el Object 
+Management Group (OMG, 2014). A diferencia de los diagramas de flujo tradicionales, el BPMN 
+ofrece una semántica rica y precisa que permite representar no solo la secuencia de actividades, 
+sino también las interacciones complejas y las responsabilidades. 
+Para el diagnóstico As-Is en una empresa constructora, el BPMN es crítico por tres razones 
+funcionales: 
+ 
+• Visibilidad de Silos:  Mediante el uso de Pools (entidades) y Lanes (carriles/roles), se 
+evidencia gráficamente la fragmentación departamental y los puntos de transferencia de 
+responsabilidad (hand-offs) donde suelen ocurrir las demoras. 
+• Lógica de Decisión:  Las compuertas ( Gateways) permiten modelar la variabilidad y las 
+reglas de negocio informales (e.g., decisiones ad-hoc de compra de materiales), revelando 
+la complejidad innecesaria. 
+• Interoperabilidad: Al ser un estándar basado en XML, asegura que los modelos puedan 
+ser intercambiados entre herramientas de software y utilizados para futuras simulaciones. 
+ 
+2.4.2  Técnicas de Caracterización: Matriz 5W2H  
+Para profundizar en el detalle de cada actividad identificada, se emplean técnicas de 
+interrogación sistemática como la matriz 5W1H (What, Who, Where, When, Why, How ). Este 
+enfoque se alinea con los fundamentos de la arquitectura de procesos propuestos por Maldonado y 
+Velázquez (2006), quienes destacan la importancia de definir las "primitivas" del marco de 
+Zachman (Quién, Qué, Dónde, Cuándo, Por qué y Cómo) para lograr una descripción holística de 
+la organización. 
+En el sector construcción, esta herramienta se adapta frecuentemente como 5W1H+H 
+(Hazards o Riesgos), permitiendo no solo caracterizar el flujo operativo, sino también identificar 
+simultáneamente los riesgos de seguridad o financieros asociados a cada paso (SafetyCulture, 
+2025). Esta doble función es vital para justificar la priorización de pr ocesos basada en evidencia 
+de ineficiencia y riesgo operativo, facilitando el paso de la observación empírica a la 
+documentación estructurada. 
+ 
+ 
+  
+ 
+III. MATERIALES Y MÉTODOS 
+3.1 Materiales de estudio 
+La unidad de análisis fue la organización Constructora MAAQ Arquitectos e Ingenieros 
+S.A.C., ubicada en Tingo María. El estudio abarcó las áreas de Operaciones, Logística, 
+Administración y Gerencia. 
+Para el desarrollo del diagnóstico y la propuesta de mejora, se utilizaron los siguientes 
+materiales: 
+• Acervo Documental:  Cuadernos de obra, guías de remisión, historiales de chat 
+(WhatsApp) para evidenciar la informalidad, y expedientes técnicos de obras pasadas. 
+• Software de Modelado:  Bizagi Modeler (Versión 4.0) para la diagramación de flujos 
+BPMN (As-Is y To-Be). 
+• Herramientas de Análisis: Microsoft Excel para la tabulación de la Matriz de Priorización 
+y Microsoft Word para la estructuración de las Fichas Técnicas y Matrices 5W2H. 
+• Marco Normativo: Reglamento Nacional de Edificaciones (RNE) y Ley de Contrataciones 
+del Estado, utilizados como base para diseñar los controles en los procesos propuestos (To-
+Be). 
+ 
+3.2 Metodología de trabajo 
+La investigación se desarrolló bajo un diseño descriptivo -propositivo. La metodología 
+siguió el ciclo de vida BPM, estructurada en cinco fases secuenciales: 
+Fase 1: Levantamiento de Información (Descubrimiento)  Se aplicaron técnicas de 
+recolección de datos cualitativos para entender la realidad operativa: 
+• Entrevistas: Realizadas al Gerente General, Residente de Obra y Asistente Administrativo. 
+• Observación Directa: Seguimiento en campo de los procesos de recepción de materiales y 
+control de avance, identificando la brecha entre "lo que se dice" y "lo que se hace". 
+ 
+Fase 2: Identificación y Arquitectura (As-Is) Se sistematizó la información para construir 
+el Inventario de Procesos y el Mapa de Procesos As-Is, clasificando las actividades en Estratégicas, 
+Misionales y de Soporte según la teoría de la Cadena de Valor de Porter. 
+ 
+ 
+Fase 3: Evaluación y Priorización  Se utilizó una Matriz de Priorización (Salud vs. 
+Importancia) para filtrar los 15 procesos identificados. Se seleccionaron los 7 procesos más críticos 
+(aquellos con alta importancia estratégica pero muy baja salud operativa) para ser objeto de 
+reingeniería. 
+ 
+Fase 4: Diagnóstico y Modelado As -Is Se caracterizaron los procesos actuales mediante 
+diagramas BPMN y matrices, evidenciando los "puntos de dolor", cuellos de botella y riesgos 
+operativos (como la falta de control en almacén y la informalidad en la gestión de cambios). 
+ 
+Fase 5: Diseño de la Reingeniería (To -Be) Esta fase constituyó el aporte propositivo del 
+estudio. Se rediseñaron los 7 procesos críticos bajo un enfoque de transformación digital y control 
+preventivo. 
+• Técnica: Se aplicó la metodología 5W2H mejorada para definir la solución (Qué, Quién, 
+Dónde, Cuándo, Por qué, Cómo y Cuánto). 
+• Modelado: Se crearon nuevos diagramas BPMN que incorporan roles especializados 
+(Inspector de Calidad, Coordinador de Recursos), uso de tecnología (ERP, Apps móviles) 
+y compuertas de validación. 
+• Arquitectura: Se redefinió el Mapa de Procesos y la Cadena de Valor para reflejar una 
+organización gestionada por procesos y soportada por tecnología. 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+IV. RESULTADOS Y DISCUSIÓN 
+4.1 Diagnóstico del estado actual (As-Is) 
+Para garantizar un análisis coherente y alineado con los objetivos estratégicos de 
+Constructora MAAQ S.A.C., el plan de ejecución sigue un enfoque jerárquico. Se parte de la 
+definición de la arquitectura empresarial para luego descender a la identificación , clasificación y 
+priorización de los procesos operativos. 
+ 
+4.1.1 Arquitectura de Procesos 
+La arquitectura de procesos proporciona la visión holística de cómo la organización crea y 
+entrega valor a sus clientes. Para este diagnóstico, se ha adoptado el modelo de la Cadena de Valor 
+de Michael Porter, el cual permite estructurar las actividades de la empresa en procesos de soporte 
+y procesos primarios (misionales), integrando tanto las actividades priorizadas para este estudio 
+como aquellas complementarias que garantizan la operatividad total. 
+ 
+4.1.1.1 Diagrama de la Cadena de Valor 
+Se ilustra la interacción de los macroprocesos, destacando el flujo desde la gestión de 
+proveedores hasta la entrega de la obra y el servicio post-venta. 
+ 
+ 
+ 
+Figura IV.1 Cadena de Valor de Constructora MAAQ S.A.C.  
+ 
+
+21 
+ 
+ 
+4.1.1.2 Análisis del Flujo de Valor 
+El diagrama presentado en la Figura 4.1 evidencia que la generación de valor en MAAQ 
+S.A.C. es el resultado de la sincronización entre dos grandes bloques funcionales: 
+ 
+A. Actividades de Soporte  
+Estos procesos transversales sostienen la operación diaria y mitigan riesgos antes de que 
+afecten a la obra: 
+• Infraestructura de la Empresa: Define el marco de actuación técnica y financiera. Incluye 
+la planificación de obra (Cronograma y Presupuesto), la gestión financiera y la verificación 
+de socios estratégicos. 
+• Gestión de Recursos Humanos:  Asegura la capacidad operativa y legal. No solo abarca 
+la contratación y renovación de personal, sino que integra explícitamente la Capacitación y 
+Seguridad (SST), un componente crítico en construcción. 
+• Compras, Abastecimiento y Servicios:  Protege la cadena de suministro validando 
+proveedores y garantiza la operatividad de los activos mediante la limpieza de ambientes y 
+el mantenimiento de equipos técnicos. 
+ 
+B. Actividades Primarias  
+Representan el flujo productivo directo ("Core Business"): 
+1. Logística Interna: Es el punto de entrada crítico. Abarca la aprobación de requerimientos, 
+la Recepción de Materiales (identificado como proceso crítico) y el control de inventarios 
+para evitar pérdidas. 
+2. Operaciones: Es el núcleo de la construcción. Aquí se ejecutan las obras mediante el 
+control de avance físico, la gestión de cambios técnicos y la asignación eficiente de equipos. 
+3. Logística Externa: Cierra la fase constructiva con la entrega final de la obra, la gestión 
+ambiental de residuos y la desmovilización de recursos. 
+4. Marketing: Alimenta el flujo de trabajo mediante la gestión de licitaciones, ejecución de 
+campañas y el mantenimiento de relaciones con los clientes. 
+5. Servicios: Asegura la calidad a largo plazo mediante la atención de garantías, soporte 
+técnico post-venta y mantenimiento preventivo. 
+ 
+22 
+ 
+ 
+4.1.2 Identificación y Clasificación de Procesos (As-Is) 
+Análisis exhaustivo de la operatividad de Constructora MAAQ S.A.C., descomponiendo 
+sus actividades diarias y agrupándolas en flujos de trabajo coherentes.  
+ 
+Como resultado, se identificaron un total de 15 procesos candidatos , los cuales fueron 
+inventariados y clasificados según su afinidad funcional y su tipología dentro de la arquitectura 
+empresarial (Estratégicos, Misionales o de Soporte). 
+ 
+4.1.2.1 Inventario de procesos 
+A continuación, se listan los procesos identificados en el levantamiento de información: 
+1. Elaboración de cronograma de obra 
+2. Elaboración de presupuesto de obra 
+3. Gestión de licitaciones y convenios 
+4. Ejecución de campañas de marketing 
+5. Control de avance de obra 
+6. Gestión de cambios de proyecto 
+7. Asignación de equipos a proyectos 
+8. Aprobación de requerimientos de materiales 
+9. Recepción de materiales en obra 
+10. Contratación de personal  
+11. Renovación y liquidación de contratos 
+12. Validación de antecedentes de proveedores 
+13. Validación de solvencia de clientes 
+ 
+4.1.2.2 Clasificación de Procesos 
+La siguiente tabla detalla la estructura jerárquica de los procesos, asignándoles un 
+Macroproceso (Afinidad II) y un Subproceso (Afinidad I). 
+ 
+ 
+ 
+ 
+23 
+ 
+ 
+Tabla IV.1Inventario y Clasificación de Procesos de Constructora MAAQ S.A.C. 
+N° LISTADO DE PROCESOS (NIVEL 02) 
+AFINIDAD I 
+(NIVEL 01) 
+AFINIDAD II 
+(NIVEL 00) 
+TIPO 
+01 Elaboración de cronograma de obra Planeamiento 
+Técnico 
+Gestión 
+Estratégica y 
+Comercial 
+Estratégico 
+02 Elaboración de presupuesto de obra Estratégico 
+03 Gestión de licitaciones y convenios Gestión 
+Comercial 
+Estratégico 
+04 Ejecución de campañas de marketing Estratégico 
+05 Control de avance de obra Control de 
+Ejecución Gestión de 
+Proyectos  
+Misional 
+06 Gestión de cambios de proyecto Misional 
+07 Asignación de equipos a proyectos 
+Gestión de 
+Recursos de Obra 
+Misional 
+08 
+Aprobación de requerimientos de 
+materiales Logística de Obra Gestión Logística 
+Misional 
+09 Recepción de materiales en obra Misional 
+10 Contratación de personal  Administración 
+de Personal 
+Gestión de 
+Capital Humano 
+Soporte 
+11 Renovación y liquidación de contratos Soporte 
+12 
+Validación de antecedentes de 
+proveedores 
+Cumplimiento y 
+Riesgos 
+Gestión 
+Administrativa y 
+Legal 
+Soporte 
+13 Validación de solvencia de clientes Soporte 
+ 
+4.1.2.3 Mapa de procesos 
+Siguiendo el modelo estándar de gestión por procesos, se ha estructurado en tres bandas 
+horizontales que ilustran cómo la empresa transforma los requisitos del cliente en satisfacción. 
+1. Procesos de Soporte (Banda Superior): Proporcionan los recursos y servicios necesarios 
+para que los procesos misionales puedan ejecutarse. 
+2. Procesos Misionales (Banda Central): Constituyen el core business o razón de ser de la 
+empresa. Abarca desde la Gestión Logística hasta la Gestión de Proyectos y Ejecución. 
+3. Procesos Estratégicos (Banda Inferior): Establecen las directrices, metas y estrategias a 
+largo plazo. Incluye la Gestión Estratégica y Comercial. 
+24 
+ 
+ 
+Figura IV.2 Mapa de procesos 
+ 
+ 
+
+25 
+ 
+ 
+4.1.3 Evaluación y Priorización de Procesos 
+Se utilizó el enfoque de la Matriz de Priorización , evaluando cada proceso en función de dos 
+dimensiones críticas: Salud e Importancia. 
+ 
+4.1.3.1 Criterios de Evaluación 
+La evaluación se sustentó en criterios objetivos para reducir la subjetividad del diagnóstico 
+As-Is. 
+Salud del Proceso (Escala 1-10)  
+Esta dimensión mide el desempeño actual del proceso. Una puntuación baja (1-4) indica un 
+proceso "enfermo" o ineficiente, mientras que una alta (8 -10) indica un proceso saludable y 
+controlado. 
+ 
+Tabla IV.2Criterios de Salud del Proceso 
+CRITERIO QUÉ MIDE CÓMO INTERPRETARLO 
+Eficacia 
+Si el proceso logra los resultados 
+esperados (objetivos, plazos, 
+calidad). 
+Alta eficacia : el proceso cumple 
+lo que promete. 
+Eficiencia 
+Si el proceso usa los recursos 
+(tiempo, dinero, personal, insumos) 
+adecuadamente. 
+Baja eficiencia : tiempos largos, 
+retrabajo o desperdicio. 
+Nivel de control 
+Existencia de procedimientos, 
+responsables, y mecanismos de 
+supervisión o revisión. 
+Sin controles: alta variabilidad y 
+errores frecuentes (Estado Ad -
+Hoc). 
+Errores y reprocesos 
+Cantidad de fallos, devoluciones, 
+correcciones o reclamos asociados 
+al proceso. 
+Muchos reprocesos : proceso 
+enfermo. 
+ 
+Importancia del Proceso (Escala 1-10)  
+Esta dimensión mide el impacto estratégico y operativo del proceso en la organización. Una 
+puntuación alta indica que el proceso es crítico para el éxito del negocio. 
+26 
+ 
+ 
+Tabla IV.3 Criterios de Importancia del Proceso 
+CRITERIO QUÉ MIDE CÓMO INTERPRETARLO 
+Impacto en el cliente 
+Si el proceso afecta la 
+experiencia o satisfacción del 
+cliente (interno o externo). 
+Procesos que tocan directamente al 
+cliente son más importantes. 
+Impacto financiero 
+Si influye directamente en 
+ingresos, costos o rentabilidad. 
+Procesos que generan o resguardan 
+dinero son críticos  
+Alineación estratégica 
+Si contribuye a las metas o 
+estrategia del negocio 
+(crecimiento, reputación). 
+Cuanto más alineado, más 
+importante. 
+Dependencia 
+Cuántos otros procesos necesitan 
+que este funcione bien. 
+Si falla, arrastra a otros. Alta 
+dependencia: alta importancia. 
+Riesgo operativo 
+Qué tan grave sería si el proceso 
+se interrumpe o falla. 
+Si el impacto es alto, la importancia 
+también. 
+ 
+4.1.3.2 Matriz de Evaluación  
+Tras aplicar los criterios anteriores mediante el análisis de la información recolectada (entrevistas 
+y observación), se asignaron las siguientes puntuaciones: 
+Tabla IV.4 Matriz de Evaluación de Procesos 
+ID PROCESO IMPORTANCIA SALUD ESTADO 
+P9 Recepción de materiales en obra 10 2 Crítico 
+P8 
+Aprobación de requerimientos de 
+materiales 
+9 4 Crítico 
+P5 Control de avance físico de obra 9 5 
+Importante e 
+Inestable 
+P6 Gestión de cambios de ingeniería 8 3 Problemático 
+P1 Elaboración de cronograma de obra 9 6 Aceptable 
+P2 Elaboración de presupuesto de obra 9 7 Estable 
+P7 Asignación de cuadrillas a partidas 7 5 Regular 
+27 
+ 
+ 
+P3 Gestión de licitaciones y convenios 8 6 Aceptable 
+P4 Ejecución de campañas de marketing 6 4 
+Bajo Impacto 
+e Ineficiente 
+P10 Contratación de personal operativo 6 7 Estable 
+P11 Renovación y liquidación de contratos 5 6 Aceptable 
+P12 
+Validación de antecedentes de 
+proveedores 
+7 5 Regular 
+ 
+Diagrama de Dispersión de la Evaluación: 
+Figura IV.3 Diagrama de Dispersión 
+ 
+Interpretación: El análisis revela que el proceso P9 (Recepción de materiales en obra) se aísla 
+como el más crítico. Su Importancia (10) radica en el impacto financiero directo de los materiales 
+en el costo de obra, mientras que su Salud (2) refleja una gestión manual, s ubjetiva y propensa a 
+errores. Se analizarán los procesos P12, P9, P8, P7, P6, P5 y P4 en base al modelo To Be.  
+
+28 
+ 
+ 
+4.1.4 Caracterización de Procesos Mediante Fichas Técnicas 
+La “Ficha técnica del proceso” es la forma de documentar los procesos de cualquier nivel 
+y permite la identificación y definición de: 
+• El nombre del proceso: se sugiere colocar un nombre que resuma las actividades 
+que ejecuta el proceso. 
+• El objetivo del proceso:  para qué se ejecuta el proceso, qué logra la entidad 
+ejecutando ese proceso. La pregunta clave aquí es ¿por qué el proceso agrega valor? 
+• El dueño: se indica el puesto del “Dueño del proceso”. 
+• El tipo de proceso: se indica si el proceso que se está caracterizando es estratégico, 
+misional o de apoyo. 
+• El alcance: Detalla los lugares, órganos y/o oficinas desconcentradas en donde se 
+ejecuta el proceso. Los elementos de entrada. 
+• Los procesos o subprocesos del siguiente nivel en que se desagrega el proceso que 
+se está detallando 
+• Los productos del proceso. 
+• Las personas (usuarios, beneficiarios, administrados, clientes u otras) que reciben 
+los servicios. 
+• Recursos: se indican los recursos humanos, instalaciones, equipos, sistemas de 
+información que se utilizan en la ejecución del proceso.  
+• Controles: referido a las actividades orientadas a la verificación del cumplimiento 
+de los requisitos del  producto y a los requisitos legales y normativos (directivas) 
+que regulan las actividades del proceso. 
+ 
+Caracterización detallada de los procesos de Nivel 0 (Macroprocesos) y Nivel 1 
+(Subprocesos) identificados en la arquitectura de procesos. Cada subproceso despliega los procesos 
+relacionados según la jerarquía de procesos, es necesario describir cada proceso con el uso de 
+herramientas como la Matriz 5W12H y BPMN para la validación de procesos, además se incluyen 
+interpretaciones y descripciones detalladas. 
+ 
+29 
+ 
+ 
+4.1.4.1 Fichas Técnicas de los procesos Estratégicos 
+Ficha Técnica N°01: Nivel 0 - Gestión Estratégica y Comercial 
+Tabla IV.5 Ficha Técnica: Gestión Estratégica y Comercial 
+PROCESOS NIVEL 0 NOMBRE Gestión Estratégica y Comercial 
+OBJETIVO Definir el rumbo del negocio, asegurar la captación de nuevos proyectos y garantizar la 
+viabilidad técnica-económica de las obras antes de su inicio. 
+OWNER Gerencia TIPO Procesos Estratégico 
+ALCANCE Inicia con el análisis de oportunidades de mercado y finaliza con la firma del contrato de 
+obra y la aprobación del presupuesto meta. 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Oficina central 
+Laptops. Plotter 
+Costos, MS Project 
+Portal SEACE 
+Excel. 
+Gerente General 
+Jefe de Oficina Técnica 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Rentabilidad mínima esperada Revisión y aprobación de propuestas de obra. 
+
+30 
+ 
+ 
+Ficha Técnica N°02: Nivel 1 – Planeamiento Técnico 
+Tabla IV.6 Ficha Técnica: Planeamiento Técnico 
+PROCESOS NIVEL 1 NOMBRE Planeamiento Técnico 
+OBJETIVO Establecer la línea base de tiempo y costo para la ejecución de la obra, asegurando que el 
+proyecto sea ejecutable y rentable. 
+OWNER Jefe de Proyecto TIPO Procesos Estratégico 
+ALCANCE Desde la revisión de planos y metrados  hasta la emisión del Presupuesto Venta y 
+Cronograma de Obra. Abarca ambos procesos de Nivel 2. 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Software S10 (Presupuestos) 
+MS Project (Tiempos) 
+Ingeniero de Civil.  
+Ingeniero de Presupuestos. 
+Contador 
+Jefe de Proyecto 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Rendimientos estándar de la zona Comparativo de l contexto esperado y  contexto 
+real. 
+
+31 
+ 
+ 
+Matriz 5W1H+H y BPMN de Planeamiento Técnico 
+Elaboración de Cronograma (P1)  
+Tabla IV.7Matriz de 5W12H del proceso Elaboración de cronograma de obra 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) 
+Elaboración de la programación de actividades y tiempos de ejecución 
+del proyecto utilizando herramientas digitales básicas. 
+WHO (Quién) Supervisor  
+WHERE (Dónde) 
+Área de Oficina Técnica  
+Área de Planeamiento. 
+WHEN (Cuándo) 
+Después de recibir el Expediente Técnico o antes del inicio de la 
+ejecución física o movilización. 
+WHY (Por qué) 
+Para estimar la duración de la obra y cumplir con los plazos 
+contractuales exigidos por el cliente. 
+HOW (Cómo) De manera manual y aislada, copiando plantillas de proyectos anteriores. 
+HOW MUCH 
+(Cuánto) 
+Sueldo desvalorizado del Supervisor  
+Costo de licencia de software utilizado. 
+ 
+Figura IV.4 BPMN del proceso Elaboración de cronograma de obra 
+ 
+
+32 
+ 
+ 
+Elaboración de Presupuesto (P2) 
+Tabla IV.8 Matriz de 5W12H del proceso Elaboración de presupuesto de obra 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) 
+Cálculo de los costos directos e indirectos necesarios para ejecutar la 
+obra. 
+WHO (Quién) Jefe de Proyecto o Especialista en Costos. 
+WHERE (Dónde) Área de Oficina Técnica. 
+WHEN (Cuándo) Antes de presentar la propuesta económica y definiendo el alcance 
+WHY (Por qué) 
+Para establecer el precio de venta y asegurar el margen de ganancia de la 
+empresa. 
+HOW (Cómo) 
+Reutilización de plantillas Excel de obras pasadas, actualizando precios 
+base a través de consultas a proveedores conocidos y forzando el ajuste 
+de precios unitarios hasta el margen deseado, sin análisis de riesgos 
+HOW MUCH 
+(Cuánto) 
+Sueldo del Especialista en Costos. 
+Costo de acceso a bases de datos. 
+Insumos de oficina (impresiones de planos). 
+ 
+Figura IV.5 BPMN de del proceso Elaboración de presupuesto de obra 
+ 
+ 
+
+33 
+ 
+ 
+Ficha Técnica N°03: Nivel 1 - Gestión Comercial 
+Tabla IV.9 Ficha Técnica: Gestión Comercial 
+PROCESOS NIVEL 1 NOMBRE  Gestión Comercial 
+OBJETIVO Captar y adjudicar proyectos de construcción mediante la participación en licitaciones y 
+estrategias de marketing. 
+OWNER Aréa Comercial  TIPO Procesos Estratégico 
+ALCANCE Desde la búsqueda de oportunidades en el mercado hasta la presentación de propuestas y 
+firma de contratos. 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Portal OSCE/SEACE 
+Redes Sociales 
+Asistente Administrativo 
+Asistente Comercial. 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Vigencia del RNP 
+Cumplimiento de TDRs.  
+Checklist de documentos obligatorios para licitar. 
+ 
+
+34 
+ 
+ 
+Matriz 5W1H+H y BPMN de Gestión Comercial 
+Gestión de licitaciones y convenios (P3)  
+Tabla IV.10 Matriz de 5W12H del proceso Gestión de licitaciones y convenios 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) 
+Búsqueda, preparación y presentación de expedientes para concursos 
+públicos o privados. 
+WHO (Quién) 
+Asistente Comercial 
+Gerencia. 
+WHERE (Dónde) Área Comercial. 
+WHEN (Cuándo) 
+Después de publicada una convocatoria o antes de la adjudicación o 
+firma de contrato. 
+WHY (Por qué) Para conseguir nuevos contratos que aseguren ingresos de la empresa. 
+HOW (Cómo) Armando los expedientes sin revisión de calidad cruzada. 
+HOW MUCH 
+(Cuánto) 
+Sueldo del equipo comercial y costo de garantías 
+Gastos notariales y de impresión de expedientes voluminosos. 
+ 
+Figura IV.6 BPMN de del proceso Gestión de licitaciones y convenios 
+ 
+
+35 
+ 
+ 
+Ejecución de campañas de marketing (P4) 
+Tabla IV.11 Matriz de 5W12H del proceso Ejecución de campañas de marketing 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) 
+Promoción esporádica de los servicios de la constructora en medios 
+digitales. 
+WHO (Quién) Gerente General (o asistente administrativo en tiempos libres). 
+WHERE (Dónde) Área Comercial y Marketing. 
+WHEN (Cuándo) Cuando las ventas bajan o no hay obras activas (Reactivo). 
+WHY (Por qué) 
+Para intentar captar clientes privados cuando no hay licitaciones 
+públicas. 
+HOW (Cómo) 
+Publicaciones informales en Facebook, sin segmentación ni presupuesto 
+definido. 
+HOW MUCH 
+(Cuánto) 
+Tiempo del Gerente o Asistente (Costo de oportunidad). 
+Pago de publicidad en redes (si aplica). 
+ 
+Figura IV.7 BPMN de del proceso Ejecución de campañas de marketing 
+ 
+
+36 
+ 
+ 
+4.1.4.2 Fichas Técnicas de los procesos Misionales 
+Ficha Técnica N°04: Nivel 0 - Gestión de Proyectos 
+Tabla IV.12 Ficha Técnica: Gestión de Proyectos 
+PROCESOS NIVEL 0 NOMBRE Gestión de Proyectos 
+OBJETIVO Ejecutar la construcción de la obra cumpliendo con el alcance, plazo y calidad contractual, 
+optimizando el uso de recursos en campo. 
+OWNER Jefe de Proyecto TIPO Procesos Misionales 
+ALCANCE Inicia con la entrega de terreno y movilización, y finaliza con la recepción de obra y 
+liquidación. 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Maquinaria 
+Herramientas de trabajo 
+EPPs.  
+Jefe de Proyecto 
+Ingeniero y Arquitecto 
+Maestro de Obra, Operarios 
+Peones 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Normas RNE 
+Especificaciones del Expediente 
+Cuaderno de Obra, 
+Pruebas de Calidad 
+
+37 
+ 
+ 
+Ficha Técnica N°05: Nivel 1 – Control de Ejecución 
+Tabla IV.13 Ficha Técnica: Control de Ejecución 
+PROCESOS NIVEL 1 NOMBRE Control de Ejecución 
+OBJETIVO Monitorear el progreso físico diario y gestionar las modificaciones técnicas para asegurar 
+el cumplimiento de metas. 
+OWNER Jefe de Proyecto TIPO Procesos Misionales 
+ALCANCE Seguimiento de avance físico, gestión de adicionales/deductivos y control de calidad en 
+campo. 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Excel  
+Formatos 
+Jefe de Proyecto, Supervisor 
+Personal de obra 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Cronograma vigente 
+Manual Técnico 
+Validación del cliente 
+Aprobación del Jefe de Proyecto  en Cuaderno de 
+Obra 
+
+38 
+ 
+ 
+Matriz 5W1H+H y BPMN de Control de Ejecución 
+Control de avance físico de obra (P5) 
+Tabla IV.14 Matriz de 5W12H del proceso Control de avance físico de obra 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) Medición del progreso de las partidas ejecutadas en campo. 
+WHO (Quién) 
+Maestro de Obra 
+Supervisor y Gerencia. 
+WHERE (Dónde) Área de Operaciones (Campo). 
+WHEN (Cuándo) 
+Durante la ejecución diaria  
+Antes de elaborar la valorización mensual. 
+WHY (Por qué) Para saber cuánto se ha producido y cuánto se puede cobrar al cliente. 
+HOW (Cómo) 
+Inspección visual y reportes verbales, sin mediciones topográficas 
+precisas diarias. 
+HOW MUCH 
+(Cuánto) 
+Sueldo del equipo técnico en campo  
+Viáticos y transporte a obra. 
+Equipos de medición  
+ 
+Figura IV.8 BPMN de del proceso Control de avance físico de obra 
+ 
+
+39 
+ 
+ 
+Gestión de cambios de ingeniería (P6) 
+Tabla IV.15 Matriz de 5W12H del proceso Gestión de cambios de ingeniería 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) 
+Modificación de especificaciones, planos o alcance durante la 
+construcción. 
+WHO (Quién) Supervisor. 
+WHERE (Dónde) Área de Ingeniería y Operadores 
+WHEN (Cuándo) 
+Cuando el cliente solicita una variación  
+Imprevisto técnico. 
+WHY (Por qué) 
+Para adaptar la obra a nuevas necesidades o corregir errores del 
+expediente técnico. 
+HOW (Cómo) 
+De manera verbal e informal, ejecutando el cambio sin firmar órdenes de 
+variación o presupuestos adicionales. 
+HOW MUCH 
+(Cuánto) 
+Costo de materiales adicionales. 
+Horas hombre de re-trabajo y costo administrativo de rediseño. 
+ 
+Figura IV.9 BPMN de del proceso Gestión de cambios de ingeniería 
+ 
+
+40 
+ 
+ 
+Ficha Técnica N°06: Nivel 1 - Gestión de Recursos de Obra 
+Tabla IV.16 Ficha Técnica: Gestión de Recursos de Obra 
+PROCESOS NIVEL 1 NOMBRE Gestión de Recursos de Obra 
+OBJETIVO Asignar y distribuir eficientemente la mano de obra y equipos a los frentes de trabajo 
+activos. 
+OWNER Jefe de Proyecto TIPO Procesos Misionales 
+ALCANCE Programación diaria de tareas y distribución de herramientas a  equipos de trabajo con 
+personal activo y plan en ejecución. 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Herramientas menores (manuales y eléctricas) Jefe de Proyecto,  
+Supervisor,  
+Almacenero 
+Personal Activo 
+Peones 
+ 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Rendimiento mínimo por jornada.  Verificación visual diario de personal  
+ 
+ Verificación visual diario de equipos 
+ 
+
+41 
+ 
+ 
+Matriz 5W1H+H y BPMN de Gestión de Recursos de Obra 
+Asignación de equipos a proyectos (P7) 
+Tabla IV.17 Matriz de 5W12H del proceso Asignación de equipos a proyectos 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) 
+Distribución de personal humano a los proyectos de acuerdo con sus 
+habilidades, experiencia y capacidades. 
+WHO (Quién) Supervisor 
+WHERE (Dónde) 
+Área de Producción 
+Área operativa  
+WHEN (Cuándo) Al concretar una nueva obra 
+WHY (Por qué) Para ejecutar los proyectos 
+HOW (Cómo) 
+Se analiza los recursos humanos disponibles del área de operaciones y se 
+evalúa el proyecto, de acuerdo con quien encaje mejor o quien parece 
+tener experiencia se asigna. 
+HOW MUCH 
+(Cuánto) 
+Costo por hora muerta de personal esperando asignación. 
+Alquiler de equipos parados por mala distribución. 
+ 
+Figura IV.10 BPMN del proceso Asignación de equipos a proyectos 
+ 
+ 
+ 
+ 
+
+42 
+ 
+ 
+Ficha Técnica N°07: Nivel 0 - Gestión de Logística 
+Tabla IV.18 Ficha Técnica: Gestión de Logística 
+PROCESOS NIVEL 0 NOMBRE Gestión de Logística 
+OBJETIVO Abastecer a la obra con los materiales requeridos en el tiempo oportuno, cantidad exacta y 
+calidad especificada. 
+OWNER Área Logística TIPO Procesos Misionales 
+ALCANCE Desde la identificación de la necesidad hasta el ingreso físico al almacén de obra. 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, 
+SISTEMAS INFORMÁTICOS 
+RECURSOS HUMANOS 
+Almacén físico en obra. Personal Logístico 
+ 
+Personal Almacenero 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Especificaciones técnicas del material.  Inventario de almacén  
+ 
+(actualmente manual/Excel) 
+ 
+ 
+ 
+ 
+ 
+ 
+
+43 
+ 
+ 
+Ficha Técnica N°08: Nivel 1 – Logística de Obra 
+Tabla IV.19 Ficha Técnica: Logística de Obra 
+PROCESOS NIVEL 1 NOMBRE Logística de Obra 
+OBJETIVO Controlar el flujo de entrada de materiales para evitar desabastecimiento o pérdidas por 
+recepción de bienes no conformes. 
+OWNER Supervisor TIPO Procesos Misionales 
+ALCANCE Validación de pedidos y recepción física de camiones 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Cuaderno de Almacén (Manual), Excel. Supervisor 
+Almacenero 
+Ayudantes. 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Coincidencia con Orden de Compra Inspección visual de estado  
+ 
+Inspección visual de cantidad 
+ 
+
+44 
+ 
+ 
+Matriz 5W1H+H y BPMN de Logística de Obra 
+Aprobación de requerimientos de materiales (P8) 
+Tabla IV.20 Matriz de 5W12H del proceso Aprobación de requerimientos de materiales 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) Solicitud y autorización de compra de insumos para la obra. 
+WHO (Quién) Jefe de Logística 
+WHERE (Dónde) 
+Área de Logística  
+Área de Compras. 
+WHEN (Cuándo) 
+Después de detectar la necesidad en obra  
+Antes de contactar al proveedor. 
+WHY (Por qué) Para abastecer el almacén y no detener la producción. 
+HOW (Cómo) Pedidos informales, sin verificar stock actual ni presupuesto disponible. 
+HOW MUCH 
+(Cuánto) 
+Tiempo del personal logístico gestionando urgencias. 
+Sobreprecio por compras de último minuto (fletes express). 
+ 
+Figura IV.11 BPMN del proceso Aprobación de requerimientos de materiales 
+ 
+ 
+ 
+ 
+
+45 
+ 
+ 
+Recepción de materiales en obra (P9) 
+Tabla IV.21 Matriz de 5W12H del proceso Recepción de materiales en obra 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) 
+Verificación física y documental de los insumos entregados por el 
+proveedor. 
+WHO (Quién) 
+Almacenero de Obra 
+Personal Activo 
+WHERE (Dónde) 
+Área de Almacén de Obra  
+Área de Almacén de Logística. 
+WHEN (Cuándo) 
+Al llegar el transporte del proveedor  
+Antes de su ingreso al inventario. 
+WHY (Por qué) Para asegurar que lo que se paga es lo que realmente ingresa a la obra. 
+HOW (Cómo) 
+Inspección visual rápida, sin contar a detalle y sin cotejar contra una 
+Orden de Compra (solo contra Guía de Remisión). 
+HOW MUCH 
+(Cuánto) 
+Sueldo del Almacenero y ayudantes de descarga. 
+Costo de reposición de materiales defectuosos aceptados. 
+Costo de materiales robados/perdidos no detectados. 
+ 
+Figura IV.12 BPMN del proceso Recepción de materiales en obra 
+ 
+ 
+
+46 
+ 
+ 
+4.1.4.3 Fichas Técnicas de los procesos de Soporte 
+Ficha Técnica N°09: Nivel 0 - Gestión de Capital Humano 
+Tabla IV.22 Ficha Técnica: Gestión de Capital Humano 
+PROCESOS NIVEL 0 NOMBRE Gestión de Capital Humano 
+OBJETIVO Proveer y administrar el talento humano necesario para la operación, cumpliendo la 
+normativa laboral. 
+OWNER RRHH TIPO Procesos Soporte 
+ALCANCE Desde la convocatoria de personal obrero hasta su cese y liquidación. 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Excel de Planillas 
+Sunat 
+Asistente Administrativo 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Régimen de Construcción Civil Contratos firmados y archivado 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+47 
+ 
+ 
+Ficha Técnica N°10: Nivel 1 – Administración de Personal 
+Tabla IV.23 Ficha Técnica: Administración de Personal 
+PROCESOS NIVEL 1 NOMBRE Administración de Personal 
+OBJETIVO Formalizar el vínculo laboral y gestionar la vigencia contractual para mitigar riesgos 
+legales. 
+OWNER RRHH TIPO Procesos Soporte 
+ALCANCE Firma de contratos, control de vencimientos, renovaciones y cálculo de beneficios sociales. 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Archivos físicos y digitales Personal activo. Recursos Humanos 
+Asistente de Recursos Humanos 
+Administración 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Alta en T-Registro Alertas de vencimiento de contrato 
+ 
+
+48 
+ 
+ 
+ 
+Matriz 5W1H+H y BPMN de Administración de Personal 
+Contratación de personal operativo (P10) 
+Tabla IV.24 Matriz de 5W12H del proceso Contratación de personal operativo 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) Reclutamiento e incorporación de obreros de construcción civil. 
+WHO (Quién) Asistente Administrativo y Maestro de Obra. 
+WHERE (Dónde) Área de Recursos Humanos. 
+WHEN (Cuándo) Cuando se requiere aumentar la fuerza laboral en obra. 
+WHY (Por qué) Para cubrir la demanda de mano de obra según el avance. 
+HOW (Cómo) 
+Contratación directa en puerta de obra sin filtros, referencias, ni 
+exámenes médicos ocupacionales rigurosos. 
+HOW MUCH 
+(Cuánto) 
+Costo administrativo de alta en T-Registro. 
+Costo de EPPs iniciales. 
+Costo de baja productividad por curva de aprendizaje de personal no 
+apto. 
+ 
+Figura IV.13 BPMN del proceso Contratación de personal operativo 
+ 
+
+49 
+ 
+ 
+Renovación y liquidación de contratos (P11) 
+Tabla IV.25 Matriz de 5W12H del proceso Renovación y liquidación de contratos 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) 
+Gestión de la vigencia del vínculo laboral y cálculo de beneficios 
+sociales. 
+WHO (Quién) 
+Asistente Administrativo  
+Contador externo. 
+WHERE (Dónde) 
+Área de Recursos Humanos   
+Área de Contabilidad. 
+WHEN (Cuándo) Al finalizar el plazo del contrato o la partida presupuestal. 
+WHY (Por qué) Para cumplir con la ley laboral y evitar demandas. 
+HOW (Cómo) 
+Control manual en agenda; a menudo se pasan las fechas y el personal 
+sigue trabajando sin contrato vigente. 
+HOW MUCH 
+(Cuánto) 
+Honorarios del contador/abogado. 
+Costo de liquidaciones y beneficios sociales. 
+Multas laborales (SUNAFIL). 
+ 
+Figura IV.14 BPMN del proceso Renovación y liquidación de contratos 
+ 
+
+50 
+ 
+ 
+Ficha Técnica N°11: Nivel 0 – Gestión Administrativa y Legal 
+Tabla IV.26 Ficha Técnica: Gestión Administrativa y Legal 
+PROCESOS NIVEL 0 NOMBRE Gestión Administrativa y Legal 
+OBJETIVO Garantizar la seguridad jurídica y financiera en las relaciones con terceros (proveedores y 
+clientes). 
+OWNER Administración TIPO Procesos Soporte 
+ALCANCE Validación de antecedentes y solvencia de socios comerciales antes de la contratación 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Consulta RUC SUNAT, Centrales de Riesgo. Administrador 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Estado "Habido" y "Activo Verificación previa a la orden de compra o 
+servicio 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+51 
+ 
+ 
+Ficha Técnica N°11: Nivel 1 – Cumplimiento y Riesgos 
+Tabla IV.27 Ficha Técnica: Cumplimiento y Riesgos 
+PROCESOS NIVEL 1 NOMBRE Cumplimiento y Riesgos 
+OBJETIVO Filtrar proveedores o clientes que representen un riesgo de incumplimiento o impago para 
+la empresa. 
+OWNER Administración TIPO Procesos Soporte 
+ALCANCE Verificación de capacidad legal, técnica y financiera de terceros. 
+ACTOR ENTRADA PROCESO PRODUCTO ACTOR 
+ 
+IDENTIFICACIÓN DE RECURSOS CRÍTICOS PARA LA EJECUCIÓN 
+INSTALACIONES, EQUIPOS, SISTEMAS 
+INFORMÁTICOS 
+RECURSOS HUMANOS 
+Internet, Teléfono. Administrador 
+Asistente de Administración 
+CONTROLES 
+REQUISITOS QUE CUMPLIR CONTROLES 
+Sin deudas coactivas graves Visto bueno de Administración 
+ 
+ 
+ 
+ 
+
+52 
+ 
+ 
+Matriz 5W1H+H y BPMN de Cumplimiento y Riesgos 
+Validación de antecedentes de proveedores (P12) 
+Tabla IV.28 Matriz de 5W12H del proceso Validación de antecedentes de proveedores 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) Verificación de la situación legal y financiera de los suministradores. 
+WHO (Quién) Administrador. 
+WHERE (Dónde) 
+Área de Administración  
+Área de Compras. 
+WHEN (Cuándo) Antes de emitir una orden de compra o adelanto de dinero. 
+WHY (Por qué) Para evitar estafas o incumplimientos en la entrega. 
+HOW (Cómo) 
+Superficial 
+Casi inexistente; se confía en la "palabra" o en proveedores conocidos, 
+sin revisar deudas coactivas. 
+HOW MUCH 
+(Cuánto) 
+Tiempo del administrador. 
+Costo financiero de adelantos perdidos (en caso de estafa). 
+ 
+Figura IV.15 BPMN del proceso Validación de antecedentes de proveedores 
+ 
+ 
+ 
+ 
+
+53 
+ 
+ 
+Validación de solvencia de clientes (P13) 
+Tabla IV.29 Matriz de 5W12H del proceso Validación de solvencia de clientes 
+DIMENSIÓN DESCRIPCIÓN (AS-IS) 
+WHAT (Qué) Análisis de la capacidad de pago de los clientes privados. 
+WHO (Quién) Gerente General. 
+WHERE (Dónde) 
+Área de Finanzas  
+Gerencia. 
+WHEN (Cuándo) Antes de firmar el contrato de obra privada. 
+WHY (Por qué) Para asegurar que el cliente tiene fondos para pagar las valorizaciones. 
+HOW (Cómo) 
+Basado en la apariencia o confianza, sin reportes de centrales de riesgo 
+(Infocorp). 
+HOW MUCH 
+(Cuánto) 
+Costo de reportes financieros (si se usaran). 
+Costo financiero de capital propio usado para cubrir impagos del cliente. 
+ 
+Figura IV.16 BPMN del proceso Validación de solvencia de clientes 
+ 
+ 
+ 
+ 
+ 
+
+54 
+ 
+ 
+4.2 Diseño de la Reingeniería (To-Be) 
+4.2.1 Procesos Estratégicos 
+Ejecución de campañas de marketing (P4) 
+Mejora propuesta : Pasar de publicaciones esporádicas a una planificación estratégica 
+digital. 
+Tabla IV.30 Matriz de 5W12H del proceso Ejecución de campañas de marketing (To-Be) 
+DIMENSIÓN DESCRIPCIÓN (TO-BE) 
+WHAT (Qué) 
+Planificación, segmentación y ejecución de campañas digitales 
+estratégicas para captar clientes privados. 
+WHO (Quién) Asistente de Marketing (Rol asignado) con supervisión de Gerencia. 
+WHERE (Dónde) Plataformas digitales gestionadas desde la Oficina Comercial. 
+WHEN (Cuándo) De forma continua según un Calendario Editorial Mensual. 
+WHY (Por qué) 
+Para generar un flujo constante de clientes potenciales y reducir la 
+dependencia de licitaciones públicas. 
+HOW (Cómo) 
+Mediante el uso de herramientas de programación de contenido y 
+segmentación de audiencias pagada, con ROI. 
+HOW MUCH 
+(Cuánto) 
+Presupuesto mensual fijo para pauta publicitaria. Licencia de software de 
+diseño básico (Canva Pro/Adobe). 
+ 
+Figura IV.17BPMN de del proceso Ejecución de campañas de marketing (To-Be) 
+ 
+
+55 
+ 
+ 
+4.2.2 Procesos Misionales 
+Control de avance físico de obra (P5) 
+Mejora propuesta: Eliminar la subjetividad mediante evidencias digitales y validación 
+cruzada. 
+Tabla IV.31 Matriz de 5W12H del proceso Control de avance físico de obra (To-Be) 
+DIMENSIÓN DESCRIPCIÓN (TO-BE) 
+WHAT (Qué) 
+Medición técnica y documentada del progreso real de las partidas 
+ejecutadas en campo. 
+WHO (Quién) Jefe de Proyecto (medición) y Supervisor (validación). 
+WHERE (Dónde) En cada frente de trabajo (in-situ) y sistema de gestión de proyectos. 
+WHEN (Cuándo) 
+Diariamente (registro de metrados) y Semanalmente (reporte 
+consolidado de valorización). 
+WHY (Por qué) 
+Para garantizar que el avance reportado coincida con la realidad y evitar 
+desfases financieros en las valorizaciones. 
+HOW (Cómo) 
+Uso de Formatos de Metrados Diarios firmados y Registro Fotográfico 
+estandarizado (con fecha y hora) subido a una nube compartida para 
+auditoría. 
+HOW MUCH 
+(Cuánto) 
+Ahorro: Eliminación de multas por retrasos no detectados y reducción de 
+horas-hombre en rehacer informes mal hechos. 
+ 
+Figura IV.18 BPMN de del proceso Control de avance físico de obra (To-Be) 
+ 
+
+56 
+ 
+ 
+Gestión de cambios de ingeniería (P6) 
+Mejora propuesta: Formalizar los cambios para asegurar el cobro de los adicionales. 
+Tabla IV.32 Matriz de 5W12H del proceso Gestión de cambios de ingeniería (To-Be) 
+DIMENSIÓN DESCRIPCIÓN (TO-BE) 
+WHAT (Qué) 
+Gestión formal de solicitudes de modificación de alcance, plazo o costo 
+(Adicionales/Deductivos). 
+WHO (Quién) Residente de Obra (solicita) y Gerente de Proyectos (autoriza). 
+WHERE (Dónde) Cuaderno de Obra Digital y Oficina Técnica. 
+WHEN (Cuándo) 
+Inmediatamente después de recibir una solicitud del cliente o detectar 
+una incompatibilidad técnica. 
+WHY (Por qué) 
+Para asegurar el reconocimiento económico de los trabajos extra y 
+proteger el margen del proyecto. 
+HOW (Cómo) 
+Mediante el flujo RFI (Request for Information): 1. Solicitud escrita, 2. 
+Cotización del adicional, 3. Aprobación firmada por el cliente antes de 
+ejecutar. 
+HOW MUCH 
+(Cuánto) 
+100% de los costos de materiales y mano de obra adicionales que antes se 
+asumían como pérdida. 
+ 
+Figura IV.19 BPMN de del proceso Gestión de cambios de ingeniería (To-Be) 
+ 
+
+57 
+ 
+ 
+Asignación de equipos a proyectos (P7) 
+Mejora propuesta: Asignación estratégica basada en data y criterios objetivos. 
+Tabla IV.33 Matriz de 5W12H del proceso Asignación de equipos a proyectos (To-Be) 
+DIMENSIÓN DESCRIPCIÓN (TO-BE) 
+WHAT (Qué) 
+Planificación y asignación sistematizada de recursos operativos (equipos 
+y personal técnico) a los proyectos, basada en carga de trabajo, 
+disponibilidad en tiempo real, especialización técnica, criticidad del 
+proyecto y proyecciones de uso. 
+WHO (Quién) 
+Coordinador de Recursos Operativos (rol especializado). 
+Jefe de proyecto 
+Oficina Técnica aporta información del cronograma. 
+WHERE (Dónde) 
+Oficina de Gestión de Recursos (centralizada). 
+Plataforma digital accesible para obras y producción 
+WHEN (Cuándo) 
+Durante la planificación del proyecto (fase de pre-ejecución). 
+Actualización continua semanal según avances y disponibilidad real. 
+WHY (Por qué) 
+Para reducir horas muertas y costos por equipos parados. 
+Optimizar el uso del parque de maquinaria. 
+Garantizar que cada proyecto tenga los recursos correctos en el momento 
+adecuado y mejorar costos proyectados vs. reales. 
+HOW (Cómo) 
+Implementación de un proceso estandarizado y soportado en tecnología: 
+1. Registro y actualización digital del inventario de equipos:  
+Estado operativo, Disponibilidad, Ubicación, Horas de uso, 
+Mantenimiento programado 
+ 
+2. Evaluación técnica del proyecto:  
+Tipología de obra, Volumen de producción requerido, Cronograma ideal 
+- cronograma real, Restricciones técnicas del terreno, Generación 
+automática de un perfil de recursos requeridos, mediante reglas 
+predefinidas. 
+ 
+3. Comparativa entre requerimientos y disponibilidad:  
+58 
+ 
+ 
+Compatibilidad técnica, Historial de desempeño. 
+4. Asignación validada por supervisor técnico 
+ 
+5. Monitoreo continuo y alertas:  
+Equipos subutilizados. Equipos próximos a mantenimiento, Riesgo de 
+retrasos por falta de recursos, Realocación dinámica según avance real de 
+obra. 
+HOW MUCH 
+(Cuánto) 
+Horas muertas del personal técnico. Equipos parados o mal distribuidos. 
+Sobrecostos por alquiler de equipos externos innecesarios. 
+Retrabajos en planificación logística. 
+Transporte innecesario de maquinaria. 
+ 
+Figura IV.20 BPMN del proceso Asignación de equipos a proyectos (To-Be) 
+ 
+ 
+ 
+ 
+ 
+
+59 
+ 
+ 
+Aprobación de requerimientos de materiales (P8) 
+Mejora propuesta: Estandarizar la solicitud para evitar compras erróneas y eliminar la 
+informalidad del WhatsApp. 
+Tabla IV.34 Matriz de 5W12H del proceso Aprobación de requerimientos de materiales (To-Be) 
+DIMENSIÓN DESCRIPCIÓN (TO-BE) 
+WHAT (Qué) 
+Aprobación planificada y digital de requerimientos de materiales, basada 
+en consumos reales, stock disponible y presupuesto de obra. 
+WHO (Quién) 
+Coordinador de Abastecimiento,  
+Jefe de Proyetco, 
+Jefe de Logística 
+WHERE (Dónde) Área de Abastecimiento y Compras 
+WHEN (Cuándo) Durante la planificación de obra y mediante reposiciones programadas. 
+WHY (Por qué) Garantizar continuidad operativa, evitar urgencias y bajar costos. 
+HOW (Cómo) 
+1. Solicitudes generadas en el sistema, no por canales informales. 
+2. Validación automática de:  
+Stock en almacén,  
+Presupuesto disponible,  
+Historial de consumo,  
+Aprobación digital según niveles de autorización. 
+3. Envío directo al módulo de Compras para cotización y orden de 
+compra. 
+HOW MUCH 
+(Cuánto) 
+Tiempo perdido por compras urgentes.  
+Sobreprecios por fletes express. 
+Desviaciones presupuestales. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+60 
+ 
+ 
+Figura IV.21 BPMN del proceso Aprobación de requerimientos de materiales (To-Be) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+61 
+ 
+ 
+Recepción de materiales en obra (P9) 
+Mejora propuesta: Implementar controles de calidad y cantidad rigurosos. 
+Tabla IV.35 Matriz de 5W12H del proceso Recepción de materiales en obra (To-Be) 
+DIMENSIÓN DESCRIPCIÓN (TO-BE) 
+WHAT (Qué) 
+Recepción técnica y documentada de materiales, verificando cantidades, 
+calidad y conformidad contra la Orden de Compra y el pedido aprobado. 
+WHO (Quién) 
+Almacenero de obra apoyado por un Inspector de Recepción (rol 
+formalizado). 
+WHERE (Dónde) 
+Zona de descarga  
+Almacén de obra. 
+WHEN (Cuándo) 
+En el momento del arribo del proveedor, con registro digital obligatorio 
+y liberación de material solo después de la validación completa. 
+WHY (Por qué) 
+Garantizar exactitud en cantidades y calidad, evitar pérdidas, reducir 
+discrepancias con proveedores y asegurar trazabilidad del inventario. 
+HOW (Cómo) 
+1. Verificación física detallada:  
+conteo unitario, pesos, medidas y estado. 
+2. Comparación automática contra: 
+Orden de Compra, Guía de Remisión, Requerimiento original. 
+3. Generación de Acta de Recepción digital (con fotos) 
+4. Registro automático de entrada al inventario y notificación a Logística 
+y Oficina Técnica. 
+5. Rechazo formal de materiales fuera de especificación, con evidencia 
+registrada 
+HOW MUCH 
+(Cuánto) 
+Costos por materiales defectuosos o incompletos.  
+Pérdidas por robos o faltantes no detectados.  
+Tiempo de conciliación con proveedores. 
+ 
+ 
+ 
+ 
+62 
+ 
+ 
+Figura IV.22 BPMN del proceso Recepción de materiales en obra (To-Be) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+63 
+ 
+ 
+4.2.3 Procesos de Soporte 
+Validación de antecedentes de proveedores (P12) 
+Mejora propuesta: Filtrar proveedores riesgosos antes de cualquier negociación. 
+Tabla IV.36 Matriz de 5W12H del proceso Validación de antecedentes de proveedores (To-Be) 
+DIMENSIÓN DESCRIPCIÓN (TO-BE) 
+WHAT (Qué) 
+Evaluación formal, documentada y digital de la situación legal, 
+financiera, operativa y reputacional del proveedor antes de cualquier 
+contratación. 
+WHO (Quién) 
+Especialista de Cumplimiento y Riesgos, Área de Compras, utilizando 
+un sistema de evaluación de proveedores con criterios predefinidos. 
+WHERE (Dónde) 
+Oficina de Cumplimiento y módulo de Proveedores del ERP, con acceso 
+a bases de datos externas (SUNAT, Infocorp, OSCE, listas negras 
+internas). 
+WHEN (Cuándo) 
+Previo al registro del proveedor y de manera obligatoria antes de emitir 
+cualquier OC, contrato o adelanto. 
+Renovación anual de la evaluación. 
+WHY (Por qué) 
+Prevenir riesgos financieros, legales y reputacionales. 
+Evitar estafas, incumplimientos y proveedores no aptos. 
+HOW (Cómo) 
+1. Checklist digital de verificación: 
+• Estado RUC 
+• Deudas coactivas 
+• Sanciones OSCE 
+• Score crediticio 
+• Litigios públicos 
+• Historial de cumplimiento 
+2. Clasificación automática del riesgo del proveedor 
+(bajo/medio/alto). 
+3. Aprobación según niveles: 
+• Riesgo bajo: Compras 
+• Riesgo medio/alto: Cumplimiento + Gerencia 
+4. Registro del resultado en el ERP antes de permitir compras. 
+64 
+ 
+ 
+ 
+HOW MUCH 
+(Cuánto) 
+Menor: 
+• Pérdidas por adelantos a proveedores informales. 
+• Riesgos de estafa o incumplimiento. 
+• Tiempos de conciliación o procesos legales 
+ 
+Figura IV.23 BPMN del proceso Validación de antecedentes de proveedores (To-Be) 
+ 
+ 
+ 
+ 
+ 
+  
+
+65 
+ 
+ 
+4.3 Arquitectura aplicando la Reingeniería de Procesos 
+La nueva arquitectura de procesos transforma a Constructora MAAQ S.A.C. de una 
+organización funcional reactiva a una empresa orientada a procesos y basada en datos. La Cadena 
+de Valor To-Be se estructura sobre dos pilares fundamentales: la Integración Digital y la Gestión 
+Preventiva de Riesgos. 
+ 
+A. Actividades de Soporte (Cimientos de la Gestión):  
+Se ha fortalecido la infraestructura organizacional mediante la implementación de una 
+Oficina de Gestión de Proyectos (PMO)  y un ERP Unificado , lo que permite centralizar la 
+información técnica y financiera. 
+• Gestión de Recursos Humanos: Evoluciona hacia la especialización, incorporando filtros 
+técnicos en la selección y un programa de capacitación en Seguridad y Salud en el Trabajo 
+(SST), vital para reducir la rotación y los accidentes. 
+• Abastecimiento: Se introduce la Validación Integral de Proveedores (P12)  como un 
+escudo financiero, asegurando que solo se negocie con socios comerciales homologados y 
+solventes. 
+ 
+B. Actividades Primarias (Ciclo de Vida del Proyecto): 
+• Logística Interna:  Se ha redefinido como el primer filtro de calidad. La Recepción 
+Técnica con Evidencia (P9)  y la validación digital de requerimientos (P8) eliminan el 
+ingreso de materiales defectuosos y las pérdidas por falta de control, asegurando la 
+disponibilidad oportuna de recursos (Just-in-Time). 
+• Operaciones: La ejecución de obra se optimiza mediante la Asignación de Equipos 
+basada en datos (P7)  y el control de avance en tiempo real, lo que permite detectar 
+desviaciones antes de que afecten la ruta crítica del proyecto. 
+• Logística Externa: Se formaliza la entrega final mediante la generación de un Dossier de 
+Calidad, garantizando la satisfacción del cliente y facilitando la liquidación de la obra. 
+• Marketing y Servicios: Se adopta un enfoque proactivo mediante la gestión de licitaciones 
+y el soporte post -venta, fidelizando al cliente a través de una atención de garantías ágil y 
+transparente. 
+ 
+66 
+ 
+ 
+4.3.1. Diagrama de la Cadena de Valor Orientado a To-Be 
+Figura IV.24 Cadena de Valor Orientado a To-Be 
+ 
+ 
+4.3.2. Descripción de la Nueva Jerarquía de Procesos (To-Be) 
+La reingeniería ha reconfigurado la estructura funcional de la empresa, transitando de 
+departamentos aislados a macroprocesos integrados. A continuación, se describen los componentes 
+del nuevo Mapa de Procesos: 
+ 
+A. PROCESOS ESTRATÉGICOS (Nivel 0) 
+Orientan el rumbo de la organización y gestionan la infraestructura tecnológica necesaria 
+para la operación digital. 
+1. Gestión Estratégica y Tecnología Este macroproceso evoluciona para incluir el soporte 
+tecnológico como pilar de la estrategia. 
+
+67 
+ 
+ 
+• Gestión de la Tecnología (Nuevo): Encargado de administrar el sistema ERP, la seguridad 
+de la información en la nube y el mantenimiento de dispositivos móviles para el control en 
+campo. 
+• Gestión Comercial y Marketing (P4):  Integra la captación de clientes mediante 
+estrategias digitales planificadas (P4) , asegurando un flujo constante de oportunidades de 
+negocio (leads) cualificados para reducir la capacidad ociosa. 
+ 
+B. PROCESOS MISIONALES (Nivel 0) 
+Constituyen la cadena de valor operativa. Se han reestructurado para garantizar la 
+trazabilidad y el control de calidad desde el abastecimiento hasta la ejecución. 
+2. Ingeniería y Planeamiento Fase de pre-construcción donde se define la línea base del 
+proyecto. 
+• Planeamiento Técnico (P1 y P2): Ahora se alimenta de datos históricos reales para generar 
+cronogramas y presupuestos precisos, reduciendo la incertidumbre financiera. 
+• Gestión de Licitaciones (P3): Formalizada para asegurar expedientes técnicos sin errores 
+y presentados a tiempo. 
+ 
+3. Gestión Logística y Abastecimiento  Se eleva a nivel misional debido a su impacto 
+directo en la rentabilidad. Deja de ser un área de "compras" para ser una cadena de suministro 
+controlada. 
+• Aprobación de Requerimientos (P8 - To-Be): Subproceso digitalizado que valida stock 
+y presupuesto en tiempo real antes de autorizar cualquier compra, eliminando adquisiciones 
+duplicadas o innecesarias. 
+• Recepción Técnica en Obra (P9 - To-Be): Proceso de control de calidad obligatorio. 
+Funciona como un filtro de entrada donde se validan cantidades y estado físico mediante 
+evidencia digital, impidiendo el ingreso de materiales no conformes. 
+ 
+4. Ejecución y Control de Obras  El núcleo de la producción, ahora caracterizado por la 
+visibilidad en tiempo real. 
+68 
+ 
+ 
+• Control de Ejecución (P5 - To-Be): Monitoreo del avance físico mediante reportes 
+fotográficos estandarizados y metrados validados, eliminando la subjetividad en las 
+valorizaciones. 
+• Gestión de Cambios (P6 - To-Be): Procedimiento formal para la gestión de adicionales 
+(RFI), asegurando que cualquier modificación técnica tenga respaldo contractual y 
+presupuestal antes de ejecutarse. 
+• Gestión de Recursos Operativos (P7 - To-Be): Asignación inteligente de maquinaria y 
+cuadrillas basada en la planificación (Lookahead), minimizando horas muertas y 
+optimizando el uso de activos. 
+ 
+C. PROCESOS DE SOPORTE (Nivel 0) 
+Provisión de recursos y aseguramiento del cumplimiento normativo y financiero. 
+5. Gestión de Capital Humano 
+• Administración de Personal (P10 y P11): Enfocado en la atracción de talento competente 
+mediante filtros técnicos en la contratación y un control riguroso de la vigencia contractual 
+para evitar contingencias laborales. 
+• Seguridad y Salud (SST): Transversal a todas las operaciones para garantizar la integridad 
+del equipo. 
+ 
+6. Gestión Administrativa y Cumplimiento (Compliance)  Nuevo enfoque que busca 
+blindar a la empresa contra riesgos externos. 
+• Validación de Socios Comerciales (P12 y P13 - To-Be): Subproceso de inteligencia 
+comercial que realiza la homologación de proveedores (P12) y la evaluación crediticia de 
+clientes (P13) antes de establecer vínculos contractuales, protegiendo el flujo de caja de la 
+empresa. 
+ 
+ 
+ 
+ 
+ 
+69 
+ 
+ 
+4.3.2.1 Clasificación de procesos en un modelo To-Be 
+Tabla IV.37 Inventario y Clasificación de Procesos de Constructora MAAQ S.A.C.(To-Be) 
+N° 
+LISTADO DE PROCESOS 
+(NIVEL 02) 
+AFINIDAD I 
+(NIVEL 01) 
+AFINIDAD II 
+(NIVEL 00) 
+TIPO 
+01 Elaboración de cronograma de obra   
+Planeamiento 
+Técnico 
+Ingeniería y 
+Planeamiento 
+Misional 
+02 Elaboración de presupuesto de obra  Misional 
+03 
+Gestión de licitaciones y 
+expedientes  
+Gestión de 
+Licitaciones 
+Misional 
+04 
+Control de avance de obra con 
+evidencia  
+Control de 
+Ejecución 
+Ejecución y 
+Control de Obras 
+Misional 
+05 Gestión formal de cambios y RFI  
+Gestión de 
+Cambios 
+Misional 
+06 
+Asignación optimizada de recursos 
+y equipos 
+Gestión de 
+Recursos 
+Operativos 
+Misional 
+07 
+Aprobación digital de 
+requerimientos  
+Gestión de 
+Abastecimiento 
+Gestión Logística y 
+Abastecimiento 
+Misional 
+08 
+Recepción técnica en obra con 
+evidencia  
+Control de 
+Calidad de 
+Entrada 
+Misional 
+09 
+Contratación y administración de 
+personal  Administración 
+de Personal 
+Gestión de Capital 
+Humano 
+Soporte 
+10 
+Renovación y liquidación 
+contractual  
+Soporte 
+11 
+Homologación y validación de 
+proveedores  
+Due Diligence 
+de Proveedores 
+Gestión 
+Administrativa y 
+Cumplimiento 
+Soporte 
+12 
+Evaluación crediticia y validación 
+de clientes  
+Due Diligence 
+de Clientes 
+Soporte 
+70 
+ 
+ 
+13 
+Gestión del ERP y soporte 
+tecnológico  Gestión de 
+Tecnología Gestión 
+Estratégica y 
+Tecnológica 
+Estratégico 
+14 
+Gestión de datos y seguridad de la 
+información  
+Estratégico 
+15 
+Gestión comercial y marketing 
+digital 
+Gestión 
+Comercial y 
+Marketing 
+Estratégico 
+ 
+ 
+71 
+ 
+ 
+4.3.3. Mapa de Procesos Orientado a To-Be 
+Figura IV.25 Mapa de Procesos To-Be: El futuro de MAAQ S.A.C. 
+ 
+Interpretación: El Mapa de Procesos evidencia una organización que ha dejado de operar por urgencias ( Ad-hoc) para operar bajo 
+estándares definidos y controlados. 
+
+72 
+ 
+ 
+La nueva arquitectura de procesos propuesta para Constructora MAAQ S.A.C. representa la 
+evolución de una gestión funcional y reactiva hacia una gestión por procesos integrada y 
+digitalizada. El mapa se reestructura en tres niveles jerárquicos que garantizan la alineación 
+estratégica con la operación: 
+1. Nivel Estratégico: La Tecnología como Eje de Gobierno 
+A diferencia del modelo As-Is, donde la tecnología era inexistente o una herramienta aislada, en el 
+modelo To-Be se crea el macroproceso de Gestión Estratégica y Tecnológica. 
+• Innovación: Se reconoce explícitamente la "Gestión del ERP"  y la "Seguridad de la 
+Información" como procesos estratégicos. Esto implica que la toma de decisiones 
+gerenciales ya no se basa en la intuición, sino en la gobernanza de datos, asegurando que la 
+información que fluye desde las obras (avances, costos) esté protegida y disponible en 
+tiempo real para la Alta Dirección. 
+• Enfoque Comercial: La "Gestión Comercial y Marketing Digital"  deja de ser una tarea 
+operativa esporádica para convertirse en un proceso directivo enfocado en la sostenibilidad 
+del negocio mediante la captación planificada de clientes privados. 
+2. Nivel Misional: Cadena de Valor Integrada (Planificar - Abastecer - Ejecutar) 
+El Core Business  se ha reorganizado en tres bloques lógicos que eliminan los "silos" 
+departamentales: 
+• Ingeniería y Planeamiento:  Consolida la fase de pre -construcción. La "Elaboración de 
+cronogramas" y "Presupuestos" se integran con la "Gestión de Licitaciones", asegurando 
+que los proyectos nazcan con una línea base técnica sólida y realista antes de pasar a campo. 
+• Gestión Logística y Abastecimiento:  Se redefine el rol de la logística. Ya no es solo 
+"comprar", sino "Gestionar el Abastecimiento". La inclusión de la "Aprobación digital" y 
+la "Recepción técnica con evidencia"  (antiguo P9 crítico) establece un filtro de calidad 
+obligatorio, garantizando que a la etapa de construcción solo lleguen insumos conformes, 
+eliminando pérdidas por materiales defectuosos. 
+• Ejecución y Control de Obras:  Es el centro de la producción. Se formaliza el control 
+mediante procesos de "Control de avance con evidencia" , "Gestión formal de cambios 
+(RFI)" y "Asignación optimizada de recursos" . Esto transforma la supervisión de obra de 
+una actividad visual subjetiva a una auditoría técnica basada en registros documentales. 
+3. Nivel de Soporte: Blindaje Administrativo y de Cumplimiento 
+73 
+ 
+ 
+Los procesos de apoyo se han fortalecido para mitigar riesgos financieros y legales, pasando de ser 
+meros trámites a barreras de seguridad corporativa. 
+• Gestión Administrativa y Cumplimiento:  Se introduce el concepto de Due Diligence  
+(Debida Diligencia). Los procesos de "Homologación de proveedores"  y "Validación de 
+clientes" actúan como un escudo financiero, previniendo estafas, impagos y relaciones con 
+socios comerciales riesgosos antes de que ingresen a la cadena de valor. 
+• Gestión de Capital Humano: La administración de personal se profesionaliza, asegurando 
+no solo la contratación, sino el cumplimiento estricto de la normativa laboral mediante la 
+"Renovación y liquidación contractual"  oportuna, reduciendo la exposición a multas 
+laborales. 
+ 
+4.4 Discusión de Resultados 
+La presente investigación partió de un diagnóstico que situaba a Constructora MAAQ 
+S.A.C. en un Nivel de Madurez Inicial (Ad-hoc), caracterizado por la informalidad, la reactividad 
+y la dependencia de la experiencia individual. La propuesta de reingeniería (To-Be) diseñada para 
+los 7 procesos críticos demuestra que es posible elevar este nivel de madurez hacia un estado 
+Gestionado y Definido, mediante la integración de controles digitales y la formalización de flujos 
+de trabajo. 
+4.4.1. Contrastación: Del Empirismo a la Gestión Técnica 
+El análisis comparativo entre el estado actual ( As-Is) y la propuesta ( To-Be) revela tres 
+cambios fundamentales en la dinámica operativa de la organización: 
+ 
+A. En la Gestión Logística (El punto crítico)  
+El diagnóstico identificó al proceso P9: Recepción de Materiales  como el "cuello de 
+botella" más grave (Salud = 2), operando bajo una confianza ciega en el proveedor. 
+• Discusión: La implementación propuesta de un "Doble Filtro de Validación " (Cotejo 
+digital contra Orden de Compra + Inspección física obligatoria) transforma este proceso. 
+Mientras que en el escenario As-Is la empresa asumía pérdidas por materiales defectuosos 
+como "costo de negocio", en el escenario To-Be se establece una barrera de entrada que 
+garantiza la integridad del patrimonio. Esto valida la hipótesis de que la tecnología no solo 
+agiliza, sino que blinda financieramente a la obra. 
+74 
+ 
+ 
+ 
+B. En el Control de Operaciones  
+Los procesos de ejecución (P5, P6, P7) se basaban en la subjetividad del Maestro de Obra 
+("a ojo") y la informalidad verbal. 
+• Discusión: La reingeniería introduce el concepto de "Evidencia Digital". Al exigir reportes 
+fotográficos con fecha/hora y la aprobación de adicionales (RFI) antes de su ejecución, se 
+elimina la incertidumbre en las valorizaciones. La discusión se centra en que la eficiencia 
+no depende de trabajar más rápido, sino de eliminar los retrabajos  causados por órdenes 
+verbales mal interpretadas o cambios no documentados. 
+ 
+C. En el Soporte y Estrategia  
+La gestión administrativa (P12) y comercial (P4) era reactiva y basada en el "amiguismo" 
+o la urgencia. 
+• Discusión: El modelo To-Be demuestra que la prevención es más rentable que la corrección. 
+La homologación de proveedores (P12) antes de la contratación reduce a cero el riesgo de 
+estafas por adelantos, un problema recurrente en el sector regional. Asimismo, pasar de 
+"publicar fotos cuando bajan las ventas" a una planificación de marketing (P4)  asegura la 
+sostenibilidad del flujo de caja a largo plazo. 
+ 
+4.4.2. Impacto en la Arquitectura Empresarial 
+La reestructuración del Mapa de Procesos y la Cadena de Valor confirma que la adopción 
+de herramientas tecnológicas (ERP, Nube, Apps móviles) actúa como el catalizador del cambio. 
+• Mientras que el modelo As-Is mostraba "islas de información" desconectadas, el modelo 
+To-Be propone un ecosistema integrado donde el dato generado en la planificación (P1, P2) 
+fluye sin interrupciones hasta la ejecución y control. 
+• Esto implica que la organización deja de depender de las personas ("si el ingeniero falta, 
+nadie sabe qué hacer") para depender de los procesos establecidos , garantizando la 
+continuidad operativa y la escalabilidad del negocio. 
+En síntesis, la propuesta de reingeniería no solo corrige las ineficiencias detectadas (robos 
+hormiga, compras urgentes, multas), sino que dota a Constructora MAAQ S.A.C. de una ventaja 
+competitiva basada en el orden, la transparencia y la capacidad de respuesta técnica.  
+75 
+ 
+ 
+V. CONCLUSIONES  
+Tras el desarrollo del diagnóstico integral de la gestión por procesos en Constructora MAAQ 
+S.A.C., se han obtenido las siguientes conclusiones: 
+1. Diagnóstico de Madurez Organizacional: Se determinó que Constructora MAAQ S.A.C. 
+opera actualmente bajo un Nivel de Madurez Inicial (Ad -Hoc). La gestión operativa se 
+caracteriza por ser reactiva, dependiente de la experiencia individual de los residentes de 
+obra y sustentada en canales de comunicación informales (WhatsApp). Esta falta de 
+estandarización ha generado una variabilidad no controlada en los resultados de los 
+proyectos, exponiendo a la empresa a riesgos financieros y legales innecesarios. 
+2. Desarticulación de la Cadena de Valor Actual: El mapeo de la arquitectura de procesos 
+(As-Is) reveló una desconexión crítica entre los macroprocesos de Abastecimiento y 
+Operaciones. La información técnica generada en la fase de planificación (cronogramas y 
+presupuestos) no fluye eficientemente hacia la ejecución en campo, lo que provoca 
+decisiones de compra improvisadas y una "ceguera" operativa respecto al avance real de las 
+obras. 
+3. Identificación del Cuello de Botella Crítico:  Mediante la Matriz de Priorización (Salud 
+vs. Importancia), se aisló científicamente al proceso P9: Recepción de Materiales en Obra 
+como el punto más vulnerable del sistema (Importancia 10, Salud 2). La ausencia de 
+controles de entrada y la falta de cotejo contra Órdenes de Compra convierten a este proceso 
+en la principal fuente de fugas económicas (mermas y robos hormiga). 
+4. Impacto de la Reingeniería (To -Be): El diseño del modelo To -Be para los 7 procesos 
+priorizados demuestra que la integración de herramientas digitales (ERP, Apps móviles) y 
+la formalización de roles (Inspector de Calidad, Coordinador de Recursos) permiten elevar 
+el nivel de madurez hacia un estado Gestionado y Definido . La propuesta transforma la 
+cultura organizacional: de "confiar en la palabra" a "validar con evidencia", garantizando 
+la trazabilidad y la eficiencia operativa. 
+ 
+  
+76 
+ 
+ 
+VI. RECOMENDACIONES 
+Para poner en práctica los criterios evaluados en el informe es importante; 
+1. Implementación Escalonada (Piloto):  Se recomienda iniciar la implementación 
+del modelo To-Be priorizando el proceso P9: Recepción de Materiales en Obra  
+como proyecto piloto. Al ser el proceso más crítico y de alto impacto financiero, su 
+digitalización temprana generará "victorias rápidas" (ahorros inmediatos) que 
+facilitarán la aceptación del cambio por parte del personal operativo. 
+2. Adopción Tecnológica Integral:  Es imperativo que la Gerencia General invierta 
+en la adquisición de un Sistema ERP  modular (o un software de gestión de 
+construcción especializado) que soporte los nuevos flujos diseñados. Asimismo, se 
+debe dotar al personal de campo (almaceneros y residentes) de dispositivos móviles 
+(tablets/smartphones) con acceso a datos, para asegurar el registro de evidencias en 
+tiempo real. 
+3. Gestión del Cambio y Capacitación:  La transición de un modelo informal a uno 
+estandarizado generará resistencia natural. Se recomienda ejecutar un Programa de 
+Capacitación enfocado no solo en el uso de las nuevas herramientas, sino en la 
+importancia del registro de información. Es vital formalizar los nuevos roles 
+propuestos (Coordinador de Recursos, Inspector de Recepción) en el Manual de 
+Organización y Funciones (MOF) de la empresa. 
+4. Monitoreo y Mejora Continua:  Una vez implementados los nuevos procesos, se 
+debe establecer un tablero de control con KPIs operativos (ej. % de exactitud de 
+inventario, desviación de plazo, índice de rechazo de materiales). Se sugiere realizar 
+auditorías de procesos semestrales para asegurar que los diagramas BPMN 
+diseñados se cumplan en la realidad y realizar ajustes según la dinámica del 
+mercado. 
+  
+77 
+ 
+ 
+VII. REFERENCIAS 
+ABPMP International. (2020). BPM CBOK: Guide to the Business Process Management 
+Common Body of Knowledge (4th ed.). Association of Business Process Management 
+Professionals International. 
+Cruz, J., & Lévano, D. (2012). Nivel de madurez de los procesos de la gestión de servicios en 
+base a BPM. Revista de la Facultad de Ingeniería de Sistemas e Informática, 1(1), 143-156. 
+Díaz Piraquive, F. N. (2008). Gestión de procesos de negocio BPM (Business Process 
+Management), TICs y crecimiento empresarial. Universidad & Empresa, 7(15), 151-176. 
+https://revistas.urosario.edu.co/index.php/empresa/article/view/1057 
+Dumas, M., La Rosa, M., Mendling, J., & Reijers, H. A. (2018). Fundamentals of Business 
+Process Management (2nd ed.). Springer Berlin Heidelberg. https://doi.org/10.1007/978-3-662-
+56509-4 
+Instituto Nacional de Estadística e Informática. (2023). Encuesta Nacional de Empresas: 
+Resultados del Sector Construcción. INEI. 
+https://www.google.com/search?q=https://www.inei.gob.pe/biblioteca-virtual/boletines/ 
+Maldonado, A., & Velázquez, A. (2006). Un método para definir la arquitectura de procesos. En 
+Proceedings of the 12th Americas Conference on Information Systems (AMCIS 2006) (pp. 4355-
+4366). Association for Information Systems. 
+https://www.google.com/search?q=https://aisel.aisnet.org/amcis2006/194/ 
+Object Management Group. (2014). Business Process Model and Notation (BPMN), Version 
+2.0.2. OMG. https://www.omg.org/spec/BPMN/2.0.2/ 
+Páez, G., Rohvein, C., Paravie, D., & Jaureguiberry, M. (2018). Revisión de modelos de madurez 
+en la gestión de los procesos de negocios. Ingeniare. Revista chilena de ingeniería, 26(4), 685-
+698. https://www.google.com/search?q=https://doi.org/10.4067/S0718-33052018000400685 
+Porter, M. E. (1985). Competitive Advantage: Creating and Sustaining Superior Performance. 
+Free Press. 
+Universidad Nacional Agraria de la Selva. (2021). Manual de Normas de Redacción y 
+Presentación de Documentos Científicos (Resolución Nº 067-2021-CU-R-UNAS). 
+Vicerrectorado de Investigación. 
+Weske, M. (2019). Business Process Management: Concepts, Languages, Architectures (3rd ed.). 
+Springer Berlin Heidelberg. https://doi.org/10.1007/978-3-662-59432-2 
+Zamora Cánovas, J. J. (2016). Gestión de una empresa constructora [Trabajo de Fin de Grado, 
+Universidad Politécnica de Cartagena]. Repositorio Digital UPCT. 
+https://www.google.com/search?q=http://hdl.handle.net/10317/5638  
+78 
+ 
+ 
+VIII. ANEXOS 
+8.1 Descripción de escenarios de ineficiencia (As-Is) 
+Estas descripciones reflejan el estado de madurez "Inicial" (Ad -hoc), caracterizado por la 
+informalidad, la reactividad y la dependencia de la memoria individual. 
+A. Procesos estratégicos 
+1. Elaboración de cronograma de obra: El cronograma se realiza en un archivo Excel inicial 
+que nunca se actualiza después del inicio de obra. Se basa en la intuición del Supervisor en 
+lugar de rendimientos históricos reales. 
+2. Elaboración de presupuesto de obra:  Se utilizan plantillas de presupuestos antiguos 
+estimados. Los precios de los insumos son estimados en base a consultas con proveedores 
+conocidos pero sin tener en cuenta el margen de error o gastos imprevistos. 
+3. Gestión de licitaciones y convenios: La búsqueda de licitaciones es reactiva; se enteran de 
+los concursos por el "boca a boca" o revisando el portal del SEACE el día antes del cierre. 
+La preparación de los documentos se hace a última hora, de madrugada y sin revisión 
+cruzada. 
+4. Ejecución de campañas de marketing: No existe un plan de marketing. Las acciones se 
+limitan a publicar fotos esporádicas y de mala calidad en una página de Facebook personal 
+cuando el Gerente se acuerda o cuando las ventas están muy bajas. 
+B. Procesos misionales 
+5. Control de avance físico de obra:  El avance se mide subjetivamente por el maestro de 
+obra ("ya vamos como al 50%"). No hay metrados diarios verificados ni reportes 
+fotográficos estandarizados. Los informes a gerencia se maquillan para evitar regaños. 
+6. Gestión de cambios de ingeniería (Modificaciones): El cliente pide un cambio en la obra 
+(ej. "mueve esa pared", "cambia este piso") verbalmente al maestro o al residente en una 
+visita rápida. No se firma ninguna orden de cambio ni se recotiza formalmente. 
+7. Asignación de equipos a proyectos:  El maestro de obra decide cada mañana qué hace 
+quién, basándose en quién llegó a trabajar y qué es lo más urgente en ese instante. No hay 
+planificación semanal de frentes de trabajo (Lookahead). 
+8. Aprobación de requerimientos de materiales:  Los pedidos se hacen por WhatsApp o 
+notas de voz al Jefe de Logística, a menudo con descripciones vagas ("mándame 20 bolsas 
+de cemento urgente"). No hay flujo de aprobación formal ni verificación de stock. 
+79 
+ 
+ 
+9. Recepción de materiales en obra: El material llega a obra y el almacenero (o a veces un 
+peón cualquiera) firma la guía del transportista sin contar ni revisar a fondo, confiando en 
+el proveedor. No tiene la Orden de Compra para comparar especificaciones o cantidades. 
+C. Procesos de soporte 
+10. Contratación de personal operativo: Se contrata al personal que se presenta en la puerta 
+de la obra o "amigos" de los albañiles actuales, sin verificar antecedentes penales, 
+referencias laborales ni habilidades técnicas reales. 
+11. Renovación y liquidación de contratos:  El control de vencimientos de contratos es 
+manual (agenda personal) o inexistente. A menudo, el personal sigue trabajando con el 
+contrato vencido sin renovación formal. 
+12. Validación de antecedentes de proveedores:  Se elige al proveedor que ofrece el precio 
+más bajo o al "conocido" de siempre, sin verificar su capacidad financiera, legal (RNP) o 
+deudas con SUNAT. 
+13. Validación de solvencia de clientes:  Se aceptan trabajos de clientes privados basándose 
+en la confianza o la apariencia, sin verificar su historial crediticio (Infocorp) o liquidez real 
+para afrontar el proyecto. 
+ 
+8.2 Descripción de procesos orientados a la reingeniería (To-Be) 
+Estas descripciones resumen la solución técnica propuesta para los 7 procesos críticos, 
+elevando el nivel de madurez a "Definido y Gestionado". 
+A. Procesos estratégicos 
+4. Ejecución de campañas de marketing: Implementación de una planificación estratégica 
+digital. Se utiliza Meta Business Suite para la programación de contenidos y segmentación 
+de audiencias pagada (Ads), con métricas claras de retorno de inversión (ROI) y un 
+presupuesto mensual fijo. 
+B. Procesos misionales 
+5. Control de avance físico de obra:  Medición técnica eliminando la subjetividad. Se 
+implementan formatos de metrados diarios firmados y un registro fotográfico estandarizado 
+(con fecha/hora) subido a la nube para auditoría y validación cruzada entre Residente y 
+Supervisor. 
+80 
+ 
+ 
+6. Gestión de cambios de ingeniería (Modificaciones):  Formalización de solicitudes 
+mediante flujo RFI (Request for Information). Se exige solicitud escrita, cotización del 
+adicional y, crucialmente, la aprobación firmada del cliente (Adenda) antes de ejecutar 
+cualquier trabajo extra. 
+7. Asignación de equipos a proyectos: Planificación sistematizada. Se utiliza un software o 
+plataforma digital para asignar recursos basándose en la carga de trabajo real, 
+disponibilidad y cronograma (Lookahead), eliminando tiempos muertos. 
+8. Aprobación de requerimientos de materiales: Estandarización digital. Las solicitudes se 
+generan en sistema con códigos específicos; el software valida automáticamente el stock en 
+almacén y el presupuesto disponible antes de autorizar la compra, eliminando la 
+informalidad del WhatsApp. 
+9. Recepción de materiales en obra:  Control de calidad riguroso. El almacenero y un 
+inspector validan físicamente (conteo ciego) la carga y la cotejan obligatoriamente contra 
+la Orden de Compra impresa y la Guía de Remisión antes de dar conformidad en el sistema. 
+C. Procesos de soporte 
+12. Validación de antecedentes de proveedores:  Filtro preventivo de riesgo. Antes de 
+cualquier negociación, se realiza una consulta obligatoria en bases de datos (SUNAT, RNP, 
+Infocorp). Si el proveedor presenta deudas coactivas o sanciones, el sistema bloquea su 
+registro automáticamente. 
+ 
