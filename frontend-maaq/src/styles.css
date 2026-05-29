@@ -955,6 +955,15 @@ textarea:focus {
   box-shadow: 0 10px 24px rgba(255, 63, 98, 0.2);
 }
 
+.contratos-view-switch .surface-head {
+  margin-bottom: 0;
+}
+
+.contratos-view-switch .inline-actions .primary,
+.contratos-view-switch .inline-actions .ghost {
+  min-width: 132px;
+}
+
 .table-shell {
   overflow: auto;
   margin-top: 12px;

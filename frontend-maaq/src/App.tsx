@@ -777,6 +777,7 @@ export function App() {
   const [destajoForm, setDestajoForm] = useState(emptyDestajo);
   const [editEmpleadoForm, setEditEmpleadoForm] = useState(emptyEditEmpleado);
   const [analisisVisible, setAnalisisVisible] = useState(false);
+  const [contratosVista, setContratosVista] = useState<"contratos" | "fichas">("contratos");
 
   const activeModule = modules.find((item) => item.id === active);
   const activeMenu = moduleMenus[active];
@@ -916,7 +917,16 @@ export function App() {
     const obrasMap = new Map<string, number>();
     const costoAreaMap = new Map<string, number>();
     const altasMesMap = new Map<string, number>();
+    const bajasMesMap = new Map<string, number>();
     const semaforoMap = new Map<string, number>();
+
+    rrhhContratos.forEach((row) => {
+      const fechaBaja = String(row.FechaLiquidacion ?? "");
+      const mesBaja = fechaBaja.slice(0, 7);
+      if (/^\d{4}-\d{2}$/.test(mesBaja)) {
+        bajasMesMap.set(mesBaja, (bajasMesMap.get(mesBaja) ?? 0) + 1);
+      }
+    });
 
     contratosActivos.forEach((row) => {
       const obra = String(row.Obra ?? "Sin obra");
@@ -945,6 +955,10 @@ export function App() {
       .sort(([mesA], [mesB]) => mesA.localeCompare(mesB))
       .slice(-10)
       .map(([label, value]) => ({ label, value, color: "#ff3f62" }));
+    const bajasPorMes = Array.from(bajasMesMap.entries())
+      .sort(([mesA], [mesB]) => mesA.localeCompare(mesB))
+      .slice(-10)
+      .map(([label, value]) => ({ label, value, color: "#2563eb" }));
     const semaforoContratos = ["rojo", "amarillo", "verde", "gris"]
       .map((label, index) => ({
         label,
@@ -959,6 +973,7 @@ export function App() {
       contratosPorObra,
       costoMensualPorArea,
       altasPorMes,
+      bajasPorMes,
       semaforoContratos,
       totalCostoMensual: costoMensualPorArea.reduce((sum, item) => sum + item.value, 0),
       totalObras: obrasMap.size,
@@ -1760,6 +1775,11 @@ export function App() {
                     ]}
                     rows={rrhhAltas}
                     empty="Todavia no hay altas de personal"
+                    collapsible
+                    defaultOpen={false}
+                    scrollRows
+                    searchable
+                    searchPlaceholder="Buscar por nombre"
                   />
                 </section>
               </section>
@@ -1767,6 +1787,117 @@ export function App() {
 
             {active === "contratos" && (
               <section className="section-grid">
+                <section className="surface contratos-view-switch">
+                  <div className="surface-head">
+                    <div>
+                      <h2>Control de contratos</h2>
+                      <p className="form-help">Alterna entre el control de vigencia y la edicion de fichas del personal.</p>
+                    </div>
+                    <div className="inline-actions">
+                      <button className={contratosVista === "contratos" ? "primary" : "ghost"} type="button" onClick={() => setContratosVista("contratos")}>
+                        <CalendarClock size={16} />
+                        Contratos
+                      </button>
+                      <button className={contratosVista === "fichas" ? "primary" : "ghost"} type="button" onClick={() => setContratosVista("fichas")}>
+                        <Save size={16} />
+                        Editar ficha
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
+                {contratosVista === "fichas" ? (
+                  <>
+                    <div className="split">
+                      <form className="surface form-grid" onSubmit={buscarEmpleado}>
+                        <div className="form-title">
+                          <div>
+                            <h2>Buscar empleado</h2>
+                            <p className="form-help">Busca por DNI o nombre para cargar la ficha editable.</p>
+                          </div>
+                        </div>
+                        <Field label="DNI o nombre" wide>
+                          <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} required maxLength={80} />
+                        </Field>
+                        <div className="form-actions">
+                          <button className="primary" disabled={saving === "busqueda"}>
+                            <Search size={17} />
+                            Buscar
+                          </button>
+                        </div>
+                      </form>
+
+                      <form className="surface form-grid" onSubmit={saveEditEmpleado}>
+                        <div className="form-title">
+                          <div>
+                            <h2>Editar ficha</h2>
+                            <p className="form-help">Los cambios quedan auditados en el historial del sistema.</p>
+                          </div>
+                        </div>
+                        <Field label="Empleado ID">
+                          <input value={editEmpleadoForm.id_empleado} readOnly />
+                        </Field>
+                        <Field label="Documento">
+                          <input value={editEmpleadoForm.numero_documento} readOnly />
+                        </Field>
+                        <Field label="Nombres">
+                          <input value={editEmpleadoForm.nombres} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, nombres: e.target.value })} required maxLength={50} />
+                        </Field>
+                        <Field label="Apellido paterno">
+                          <input value={editEmpleadoForm.apellido_paterno} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, apellido_paterno: e.target.value })} required maxLength={50} />
+                        </Field>
+                        <Field label="Apellido materno">
+                          <input value={editEmpleadoForm.apellido_materno} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, apellido_materno: e.target.value })} required maxLength={50} />
+                        </Field>
+                        <Field label="Email">
+                          <input value={editEmpleadoForm.email} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, email: e.target.value })} type="email" required maxLength={100} />
+                        </Field>
+                        <Field label="Celular">
+                          <input value={editEmpleadoForm.celular} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, celular: e.target.value })} required maxLength={20} />
+                        </Field>
+                        <Field label="Area">
+                          <select value={editEmpleadoForm.area} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, area: e.target.value })} required>
+                            <option value="">Seleccionar area</option>
+                            {AREA_OPTIONS.map((area) => (
+                              <option key={area} value={area}>
+                                {area}
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+                        <div className="form-actions">
+                          <button className="primary" disabled={saving === "editar-empleado" || !editEmpleadoForm.id_empleado}>
+                            <Save size={17} />
+                            Guardar ficha
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+
+                    <section className="surface">
+                      <h2>Resultados de busqueda</h2>
+                      <GroupedDataTable
+                        columns={[
+                          { key: "IDempleado", label: "ID" },
+                          { key: "NumeroDocumento", label: "Documento" },
+                          { key: "Nombres", label: "Nombres" },
+                          { key: "ApellidoPaterno", label: "Paterno" },
+                          { key: "Obra", label: "Obra" },
+                          { key: "EstadoContrato", label: "Contrato" },
+                          { key: "accion", label: "Accion", render: (row) => <button className="ghost ghost--compact" onClick={() => cargarEdicion(row)}>Editar</button> }
+                        ]}
+                        rows={resultadosBusqueda}
+                        empty="Busca un empleado para ver resultados"
+                        collapsible={resultadosBusqueda.length > 20}
+                        defaultOpen
+                        scrollRows={resultadosBusqueda.length > 20}
+                        searchable={resultadosBusqueda.length > 20}
+                        searchPlaceholder="Buscar por nombre"
+                      />
+                    </section>
+                  </>
+                ) : (
+                  <>
                 <div className="split split--three">
                   <form className="surface form-grid" onSubmit={saveRenovacion}>
                     <div className="form-title">
@@ -1905,8 +2036,15 @@ export function App() {
                     ]}
                     rows={rrhhReportes.contratos_por_vencer}
                     empty="No hay contratos por vencer en los proximos 30 dias"
+                    collapsible
+                    defaultOpen={false}
+                    scrollRows
+                    searchable
+                    searchPlaceholder="Buscar por nombre"
                   />
                 </section>
+                  </>
+                )}
               </section>
             )}
 
@@ -2144,6 +2282,9 @@ export function App() {
                       <ChartCard title="Altas por mes" detail="Grafico de lineas con la evolucion de ingresos de personal.">
                         <LineChart data={analisisEstadistico.altasPorMes} />
                       </ChartCard>
+                      <ChartCard title="Bajas por mes" detail="Grafico de lineas con contratos liquidados segun fecha de baja.">
+                        <LineChart data={analisisEstadistico.bajasPorMes} />
+                      </ChartCard>
                       <ChartCard title="Contratos por obra" detail="Ranking de obras con mayor cantidad de trabajadores asignados.">
                         <BarChart data={analisisEstadistico.contratosPorObra} />
                       </ChartCard>
@@ -2204,121 +2345,6 @@ export function App() {
                   />
                 </section>
 
-                <section className="surface action-panel">
-                  <div className="surface-head">
-                    <h2>Acciones disponibles</h2>
-                    <div className="inline-actions">
-                      <button className="ghost" onClick={() => downloadExcel("personal-activo-maaq.xls", rrhhReportes.personal_activo)}>
-                        <Download size={16} />
-                        Excel
-                      </button>
-                      <button className="ghost" onClick={() => window.print()}>
-                        <FileText size={16} />
-                        PDF
-                      </button>
-                    </div>
-                  </div>
-                  <div className="action-grid action-grid--wide">
-                    <article>
-                      <Search size={18} />
-                      <span>Buscar empleado</span>
-                      <strong>Por DNI o nombre</strong>
-                    </article>
-                    <article>
-                      <Save size={18} />
-                      <span>Editar ficha</span>
-                      <strong>Datos auditables</strong>
-                    </article>
-                    <article>
-                      <FileText size={18} />
-                      <span>Ver historial</span>
-                      <strong>Cambios registrados</strong>
-                    </article>
-                    <article>
-                      <Download size={18} />
-                      <span>Exportar datos</span>
-                      <strong>PDF / Excel</strong>
-                    </article>
-                  </div>
-                </section>
-
-                <div className="split">
-                  <form className="surface form-grid" onSubmit={buscarEmpleado}>
-                    <div className="form-title">
-                      <h2>Buscar empleado</h2>
-                    </div>
-                    <Field label="DNI o nombre" wide>
-                      <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} required maxLength={80} />
-                    </Field>
-                    <div className="form-actions">
-                      <button className="primary" disabled={saving === "busqueda"}>
-                        <Search size={17} />
-                        Buscar
-                      </button>
-                    </div>
-                  </form>
-
-                  <form className="surface form-grid" onSubmit={saveEditEmpleado}>
-                    <div className="form-title">
-                      <h2>Editar ficha</h2>
-                    </div>
-                    <Field label="Empleado ID">
-                      <input value={editEmpleadoForm.id_empleado} readOnly />
-                    </Field>
-                    <Field label="Documento">
-                      <input value={editEmpleadoForm.numero_documento} readOnly />
-                    </Field>
-                    <Field label="Nombres">
-                      <input value={editEmpleadoForm.nombres} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, nombres: e.target.value })} required maxLength={50} />
-                    </Field>
-                    <Field label="Apellido paterno">
-                      <input value={editEmpleadoForm.apellido_paterno} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, apellido_paterno: e.target.value })} required maxLength={50} />
-                    </Field>
-                    <Field label="Apellido materno">
-                      <input value={editEmpleadoForm.apellido_materno} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, apellido_materno: e.target.value })} required maxLength={50} />
-                    </Field>
-                    <Field label="Email">
-                      <input value={editEmpleadoForm.email} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, email: e.target.value })} type="email" required maxLength={100} />
-                    </Field>
-                    <Field label="Celular">
-                      <input value={editEmpleadoForm.celular} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, celular: e.target.value })} required maxLength={20} />
-                    </Field>
-                    <Field label="Area">
-                      <select value={editEmpleadoForm.area} onChange={(e) => setEditEmpleadoForm({ ...editEmpleadoForm, area: e.target.value })} required>
-                        <option value="">Seleccionar area</option>
-                        {AREA_OPTIONS.map((area) => (
-                          <option key={area} value={area}>
-                            {area}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <div className="form-actions">
-                      <button className="primary" disabled={saving === "editar-empleado" || !editEmpleadoForm.id_empleado}>
-                        <Save size={17} />
-                        Guardar ficha
-                      </button>
-                    </div>
-                  </form>
-                </div>
-
-                <section className="surface">
-                  <h2>Resultados de busqueda</h2>
-                  <GroupedDataTable
-                    columns={[
-                      { key: "IDempleado", label: "ID" },
-                      { key: "NumeroDocumento", label: "Documento" },
-                      { key: "Nombres", label: "Nombres" },
-                      { key: "ApellidoPaterno", label: "Paterno" },
-                      { key: "Obra", label: "Obra" },
-                      { key: "EstadoContrato", label: "Contrato" },
-                      { key: "accion", label: "Accion", render: (row) => <button className="ghost ghost--compact" onClick={() => cargarEdicion(row)}>Editar</button> }
-                    ]}
-                    rows={resultadosBusqueda}
-                    empty="Busca un empleado para ver resultados"
-                  />
-                </section>
-
                 <div className="report-sections">
                   <section className="surface report-surface">
                     <div className="surface-head">
@@ -2335,6 +2361,11 @@ export function App() {
                       ]}
                       rows={rrhhReportes.personal_activo}
                       empty="No hay personal activo"
+                      collapsible
+                      defaultOpen={false}
+                      scrollRows
+                      searchable
+                      searchPlaceholder="Buscar por nombre"
                     />
                   </section>
                   <section className="surface report-surface">
