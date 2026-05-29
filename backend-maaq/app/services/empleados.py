@@ -32,6 +32,8 @@ def list_empleados(db: Session, q: str | None = None) -> list[dict]:
             e.Celular,
             d.Nombre AS Departamento,
             de.Area,
+            contrato.IDproyecto,
+            contrato.Obra AS ObraActual,
             te.TipoEmpleado,
             eq.Nombre AS Equipo,
             ee.FechaAsignacion,
@@ -43,6 +45,13 @@ def list_empleados(db: Session, q: str | None = None) -> list[dict]:
         LEFT JOIN dbo.Tipo_Empleado te ON de.IDtipoEmpleado = te.IDtipoEmpleado
         LEFT JOIN dbo.Equipo_Empleado ee ON e.IDempleado = ee.IDempleado
         LEFT JOIN dbo.Equipo eq ON ee.IDequipo = eq.IDequipo
+        OUTER APPLY (
+            SELECT TOP 1 c.IDproyecto, c.Obra
+            FROM dbo.RRHH_Contrato c
+            WHERE c.IDempleado = e.IDempleado
+              AND c.Estado <> 'liquidado'
+            ORDER BY c.FechaInicio DESC, c.IDcontrato DESC
+        ) contrato
         {where}
         ORDER BY e.IDempleado DESC
         """,

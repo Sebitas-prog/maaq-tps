@@ -1,16 +1,18 @@
 import json
 import html as html_lib
+from collections import defaultdict
 from datetime import date, datetime
 from decimal import Decimal, ROUND_HALF_UP
 from io import BytesIO
 from typing import Any
+from zipfile import ZIP_DEFLATED, ZipFile
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_RIGHT
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import LongTable, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
@@ -35,6 +37,18 @@ SALARIOS_MENSUALES_AREA = {
     "ingenieria y planeamiento": Decimal("3500.00"),
     "ejecucion de obras": Decimal("3000.00"),
     "seguridad y salud": Decimal("2600.00"),
+}
+
+PREFIJOS_CONTRATO_AREA = {
+    "administracion": "ADM",
+    "gerencia": "GER",
+    "recursos humanos": "RRH",
+    "operaciones": "OPE",
+    "logistica": "LOG",
+    "ingenieria y planeamiento": "INP",
+    "ejecucion de obras": "EOB",
+    "seguridad y salud": "SSO",
+    "sin area": "SNA",
 }
 
 
@@ -87,6 +101,29 @@ def salario_mensual_area(area: str | None, salario_diario_base: Any = None) -> D
 
 def salario_diario_area(area: str | None, salario_diario_base: Any = None) -> Decimal:
     return _money(salario_mensual_area(area, salario_diario_base) / Decimal("30"))
+
+
+def _prefijo_contrato_area(area: str | None) -> str:
+    key = _area_key(area) or "sin area"
+    if key in PREFIJOS_CONTRATO_AREA:
+        return PREFIJOS_CONTRATO_AREA[key]
+    words = [word for word in key.replace("-", " ").split() if word]
+    return ("".join(word[0] for word in words)[:3] or "GEN").upper()
+
+
+def _siguiente_codigo_contrato(db: Session, area: str | None) -> str:
+    prefix = _prefijo_contrato_area(area)
+    row = fetch_one(
+        db,
+        """
+        SELECT ISNULL(MAX(TRY_CONVERT(int, SUBSTRING(CodigoContrato, LEN(:prefix) + 2, 20))), 0) AS ultimo
+        FROM dbo.RRHH_Contrato
+        WHERE CodigoContrato LIKE :like_pattern
+        """,
+        {"prefix": prefix, "like_pattern": f"{prefix}-%"},
+    )
+    siguiente = int(row["ultimo"] or 0) + 1
+    return f"{prefix}-{siguiente:03d}"
 
 
 def _fmt_money(value: Any) -> str:
@@ -186,11 +223,11 @@ def _p(text: Any, style: ParagraphStyle) -> Paragraph:
     return Paragraph(_pdf_text(text), style)
 
 
-def _pdf_document(story: list[Any]) -> bytes:
+def _pdf_document(story: list[Any], pagesize: tuple[float, float] = A4) -> bytes:
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,
-        pagesize=A4,
+        pagesize=pagesize,
         rightMargin=1.6 * cm,
         leftMargin=1.6 * cm,
         topMargin=1.5 * cm,
@@ -300,35 +337,42 @@ def _require_empleado(db: Session, id_empleado: int) -> dict:
     )
 
 
-def _resolve_contrato(db: Session, id_empleado: int, obra: str, id_contrato: int | None = None) -> int | None:
+def _resolve_contrato_context(db: Session, id_empleado: int, obra: str, id_contrato: int | None = None) -> dict | None:
     if id_contrato:
         row = fetch_one(
             db,
             """
-            SELECT IDcontrato
-            FROM dbo.RRHH_Contrato
-            WHERE IDcontrato = :id_contrato
-              AND IDempleado = :id_empleado
-              AND Estado <> 'liquidado'
+            SELECT c.IDcontrato, COALESCE(p.Nombre, c.Obra) AS Obra
+            FROM dbo.RRHH_Contrato c
+            LEFT JOIN dbo.Proyecto p ON c.IDproyecto = p.IDproyecto
+            WHERE c.IDcontrato = :id_contrato
+              AND c.IDempleado = :id_empleado
+              AND c.Estado <> 'liquidado'
             """,
             {"id_contrato": id_contrato, "id_empleado": id_empleado},
         )
         if not row:
             raise AppError("Contrato activo no encontrado para el empleado", 404, "CONTRATO_NOT_FOUND")
-        return int(row["IDcontrato"])
+        return row
 
     row = fetch_one(
         db,
         """
-        SELECT TOP 1 IDcontrato
-        FROM dbo.RRHH_Contrato
-        WHERE IDempleado = :id_empleado
-          AND Obra = :obra
-          AND Estado <> 'liquidado'
-        ORDER BY FechaInicio DESC, IDcontrato DESC
+        SELECT TOP 1 c.IDcontrato, COALESCE(p.Nombre, c.Obra) AS Obra
+        FROM dbo.RRHH_Contrato c
+        LEFT JOIN dbo.Proyecto p ON c.IDproyecto = p.IDproyecto
+        WHERE c.IDempleado = :id_empleado
+          AND COALESCE(p.Nombre, c.Obra) = :obra
+          AND c.Estado <> 'liquidado'
+        ORDER BY c.FechaInicio DESC, c.IDcontrato DESC
         """,
         {"id_empleado": id_empleado, "obra": obra},
     )
+    return row
+
+
+def _resolve_contrato(db: Session, id_empleado: int, obra: str, id_contrato: int | None = None) -> int | None:
+    row = _resolve_contrato_context(db, id_empleado, obra, id_contrato)
     return int(row["IDcontrato"]) if row else None
 
 
@@ -351,6 +395,75 @@ def _default_tipo_empleado(db: Session) -> int:
             """,
         )
     return int(row["IDtipoEmpleado"])
+
+
+def _contrato_supports_proyecto(db: Session) -> bool:
+    row = fetch_one(db, "SELECT COL_LENGTH('dbo.RRHH_Contrato', 'IDproyecto') AS exists_column")
+    return bool(row and row["exists_column"] is not None)
+
+
+def _resolve_obra_contratacion(db: Session, id_proyecto: int | None, obra: str) -> tuple[int | None, str]:
+    if id_proyecto:
+        proyecto = require_one(
+            db,
+            "SELECT IDproyecto, Nombre FROM dbo.Proyecto WHERE IDproyecto = :id_proyecto",
+            {"id_proyecto": id_proyecto},
+            "Obra/proyecto no encontrado",
+        )
+        return int(proyecto["IDproyecto"]), str(proyecto["Nombre"]).strip()
+
+    obra_nombre = obra.strip()
+    proyecto = fetch_one(
+        db,
+        "SELECT TOP 1 IDproyecto, Nombre FROM dbo.Proyecto WHERE Nombre = :obra",
+        {"obra": obra_nombre},
+    )
+    if proyecto:
+        return int(proyecto["IDproyecto"]), str(proyecto["Nombre"]).strip()
+    return None, obra_nombre
+
+
+def list_obras(db: Session) -> list[dict]:
+    has_id_proyecto = _contrato_supports_proyecto(db)
+    join_condition = "c.IDproyecto = p.IDproyecto OR (c.IDproyecto IS NULL AND c.Obra = p.Nombre)" if has_id_proyecto else "c.Obra = p.Nombre"
+    proyectos = fetch_all(
+        db,
+        f"""
+        SELECT
+            p.IDproyecto AS id,
+            p.IDproyecto,
+            p.Nombre AS NombreObra,
+            p.Nombre AS label,
+            'proyecto' AS Origen,
+            COUNT(c.IDcontrato) AS TotalContratos
+        FROM dbo.Proyecto p
+        LEFT JOIN dbo.RRHH_Contrato c ON {join_condition}
+        GROUP BY p.IDproyecto, p.Nombre
+        """,
+    )
+
+    pendientes_where = "c.IDproyecto IS NULL AND" if has_id_proyecto else ""
+    pendientes = fetch_all(
+        db,
+        f"""
+        SELECT
+            CAST(NULL AS int) AS id,
+            CAST(NULL AS int) AS IDproyecto,
+            c.Obra AS NombreObra,
+            c.Obra AS label,
+            'contrato' AS Origen,
+            COUNT(*) AS TotalContratos
+        FROM dbo.RRHH_Contrato c
+        WHERE {pendientes_where} NOT EXISTS (
+            SELECT 1
+            FROM dbo.Proyecto p
+            WHERE p.Nombre = c.Obra
+        )
+        GROUP BY c.Obra
+        """,
+    )
+
+    return sorted([*proyectos, *pendientes], key=lambda item: str(item["NombreObra"]).lower())
 
 
 def actualizar_area_empleado(db: Session, id_empleado: int, area: str, id_tipo_empleado: int | None = None) -> dict:
@@ -450,6 +563,7 @@ def get_dashboard(db: Session) -> dict:
 
 def contratar(db: Session, payload: ContratacionCreate) -> dict:
     _validate_documento_unico(db, payload.numero_documento)
+    id_proyecto, obra_nombre = _resolve_obra_contratacion(db, payload.id_proyecto, payload.obra)
     empleado = fetch_one(
         db,
         """
@@ -482,21 +596,25 @@ def contratar(db: Session, payload: ContratacionCreate) -> dict:
             {"id_empleado": id_empleado, "id_tipo_empleado": id_tipo_empleado, "area": payload.area},
         )
 
-    codigo = f"MAAQ-{id_empleado:05d}-{datetime.now().strftime('%y%m%d%H%M')}"
+    codigo = _siguiente_codigo_contrato(db, payload.area)
     salario_diario = salario_diario_area(payload.area, payload.salario_diario)
+    has_id_proyecto = _contrato_supports_proyecto(db)
+    proyecto_column = ", IDproyecto" if has_id_proyecto else ""
+    proyecto_value = ", :id_proyecto" if has_id_proyecto else ""
     contrato = fetch_one(
         db,
-        """
+        f"""
         INSERT INTO dbo.RRHH_Contrato
-            (IDempleado, CodigoContrato, Obra, Cargo, FechaInicio, FechaFin, SalarioDiario)
+            (IDempleado, CodigoContrato{proyecto_column}, Obra, Cargo, FechaInicio, FechaFin, SalarioDiario)
         OUTPUT INSERTED.IDcontrato AS IDcontrato
         VALUES
-            (:id_empleado, :codigo, :obra, :cargo, :fecha_inicio, :fecha_fin, :salario_diario)
+            (:id_empleado, :codigo{proyecto_value}, :obra, :cargo, :fecha_inicio, :fecha_fin, :salario_diario)
         """,
         {
             "id_empleado": id_empleado,
             "codigo": codigo,
-            "obra": payload.obra,
+            "id_proyecto": id_proyecto,
+            "obra": obra_nombre,
             "cargo": payload.cargo,
             "fecha_inicio": payload.fecha_inicio,
             "fecha_fin": payload.fecha_fin,
@@ -522,6 +640,8 @@ def contratar(db: Session, payload: ContratacionCreate) -> dict:
         f"Alta de {payload.nombres} {payload.apellido_paterno} con contrato {codigo}",
         {
             **payload.model_dump(mode="json"),
+            "id_proyecto_aplicado": id_proyecto,
+            "obra_aplicada": obra_nombre,
             "salario_mensual_simulado": str(salario_mensual_area(payload.area, payload.salario_diario)),
             "salario_diario_aplicado": str(salario_diario),
         },
@@ -682,7 +802,9 @@ def liquidar_contrato(db: Session, id_contrato: int) -> dict:
 
 def registrar_asistencia(db: Session, payload: AsistenciaCreate) -> dict:
     _require_empleado(db, payload.id_empleado)
-    id_contrato = _resolve_contrato(db, payload.id_empleado, payload.obra, payload.id_contrato)
+    contrato = _resolve_contrato_context(db, payload.id_empleado, payload.obra, payload.id_contrato)
+    id_contrato = int(contrato["IDcontrato"]) if contrato else None
+    obra = str(contrato["Obra"]) if contrato else payload.obra
     current = fetch_one(
         db,
         """
@@ -692,13 +814,13 @@ def registrar_asistencia(db: Session, payload: AsistenciaCreate) -> dict:
           AND Fecha = :fecha
           AND Obra = :obra
         """,
-        {"id_empleado": payload.id_empleado, "fecha": payload.fecha, "obra": payload.obra},
+        {"id_empleado": payload.id_empleado, "fecha": payload.fecha, "obra": obra},
     )
     params = {
         "id_empleado": payload.id_empleado,
         "id_contrato": id_contrato,
         "fecha": payload.fecha,
-        "obra": payload.obra,
+        "obra": obra,
         "estado": payload.estado,
         "horas": payload.horas,
         "extras": payload.extras,
@@ -758,7 +880,9 @@ def registrar_asistencia(db: Session, payload: AsistenciaCreate) -> dict:
 
 def registrar_destajo(db: Session, payload: DestajoCreate) -> dict:
     _require_empleado(db, payload.id_empleado)
-    id_contrato = _resolve_contrato(db, payload.id_empleado, payload.obra, payload.id_contrato)
+    contrato = _resolve_contrato_context(db, payload.id_empleado, payload.obra, payload.id_contrato)
+    id_contrato = int(contrato["IDcontrato"]) if contrato else None
+    obra = str(contrato["Obra"]) if contrato else payload.obra
     total = _money(payload.metrado * payload.tarifa)
     row = fetch_one(
         db,
@@ -773,7 +897,7 @@ def registrar_destajo(db: Session, payload: DestajoCreate) -> dict:
             "id_empleado": payload.id_empleado,
             "id_contrato": id_contrato,
             "fecha": payload.fecha,
-            "obra": payload.obra,
+            "obra": obra,
             "partida": payload.partida,
             "metrado": payload.metrado,
             "tarifa": payload.tarifa,
@@ -853,6 +977,846 @@ def reportes_globales(db: Session) -> dict:
     }
 
 
+REPORTE_TITULOS = {
+    "contratos": "Contratos generales",
+    "contratos_activos": "Contratos activos",
+    "contratos_vencidos": "Contratos vencidos",
+    "contratos_por_vencer": "Contratos por vencer",
+    "empleados_area": "Empleados por area",
+    "ingresantes_rango": "Ingresantes por rango",
+    "planilla_rango": "Planilla por rango",
+    "asistencia_mes_pago": "Asistencia por mes de pago",
+}
+
+
+def _columnas_reporte(tipo: str, include_area: bool = True) -> list[tuple[str, str]]:
+    if tipo == "asistencia_mes_pago":
+        columns = [
+            ("CodigoContrato", "Contrato"),
+            ("Empleado", "Empleado"),
+            ("NumeroDocumento", "Documento"),
+            ("Area", "Area"),
+            ("Obra", "Obra"),
+            ("PeriodoPago", "Periodo"),
+            ("DiasPeriodo", "Dias"),
+            ("DiasRegistrados", "Reg."),
+            ("Presentes", "Presentes"),
+            ("Faltas", "Faltas"),
+            ("Tardanzas", "Tardanzas"),
+            ("Descansos", "Descansos"),
+            ("Permisos", "Permisos"),
+            ("Horas", "Horas"),
+            ("Extras", "Extras"),
+            ("FechasFalta", "Fechas falta"),
+        ]
+        return columns if include_area else [column for column in columns if column[0] != "Area"]
+    if tipo == "planilla_rango":
+        columns = [
+            ("Fecha", "Fecha"),
+            ("Empleado", "Empleado"),
+            ("NumeroDocumento", "Documento"),
+            ("Area", "Area"),
+            ("Obra", "Obra"),
+            ("HorasLaboradas", "Horas"),
+            ("Jornal", "Jornal"),
+            ("Extras", "Extras"),
+            ("TotalDestajo", "Destajo"),
+            ("TotalPlanilla", "Total"),
+        ]
+        return columns if include_area else [column for column in columns if column[0] != "Area"]
+    columns = [
+        ("CodigoContrato", "Contrato"),
+        ("Empleado", "Empleado"),
+        ("NumeroDocumento", "Documento"),
+        ("Area", "Area"),
+        ("Obra", "Obra"),
+        ("Cargo", "Cargo"),
+        ("FechaInicio", "Ingreso"),
+        ("FechaFin", "Fin"),
+        ("DiasRestantes", "Dias"),
+        ("Estado", "Estado"),
+        ("Semaforo", "Semaforo"),
+    ]
+    return columns if include_area else [column for column in columns if column[0] != "Area"]
+
+
+def _valor_reporte(value: Any) -> str:
+    if value is None or value == "":
+        return "-"
+    if isinstance(value, (date, datetime)):
+        return _fmt_date(value)
+    if isinstance(value, Decimal):
+        return f"{_money(value):,.2f}"
+    if isinstance(value, float):
+        return f"{value:,.2f}".rstrip("0").rstrip(".")
+    return str(value)
+
+
+def _reporte_filtros(
+    tipo: str,
+    area: str | None,
+    estado: str | None,
+    desde: date | None,
+    hasta: date | None,
+    q: str | None,
+    dias: int,
+    total: int,
+    mes_pago: str | None = None,
+) -> list[tuple[str, Any]]:
+    return [
+        ("Tipo", REPORTE_TITULOS.get(tipo, tipo)),
+        ("Mes de pago", mes_pago or "-"),
+        ("Area", area or "Todas"),
+        ("Estado", estado or "Todos"),
+        ("Desde", desde or "-"),
+        ("Hasta", hasta or "-"),
+        ("Busqueda", q or "-"),
+        ("Dias alerta", dias),
+        ("Registros", total),
+        ("Generado", date.today()),
+    ]
+
+
+def _row_area(row: dict) -> str:
+    value = str(row.get("Area") or "Sin area").strip()
+    return value or "Sin area"
+
+
+def _group_reporte_rows(rows: list[dict]) -> list[tuple[str, list[dict]]]:
+    groups: dict[str, list[dict]] = defaultdict(list)
+    for row in rows:
+        groups[_row_area(row)].append(row)
+    return sorted(groups.items(), key=lambda item: item[0].lower())
+
+
+def _reporte_resumen(rows: list[dict], tipo: str) -> dict[str, Any]:
+    areas = sorted({_row_area(row) for row in rows}, key=str.lower)
+    estados: dict[str, int] = defaultdict(int)
+    semaforo: dict[str, int] = defaultdict(int)
+    by_area: dict[str, dict[str, Any]] = {}
+    total_planilla = Decimal("0")
+    total_destajo = Decimal("0")
+    total_horas = Decimal("0")
+    total_faltas = 0
+    total_tardanzas = 0
+    total_sin_registro = 0
+
+    for area, group in _group_reporte_rows(rows):
+        if tipo == "asistencia_mes_pago":
+            area_horas = sum((_decimal(row.get("Horas")) for row in group), Decimal("0"))
+            area_faltas = sum(int(row.get("Faltas") or 0) for row in group)
+            area_tardanzas = sum(int(row.get("Tardanzas") or 0) for row in group)
+            area_sin_registro = sum(int(row.get("DiasSinRegistro") or 0) for row in group)
+            by_area[area] = {
+                "registros": len(group),
+                "horas": area_horas,
+                "faltas": area_faltas,
+                "tardanzas": area_tardanzas,
+                "sin_registro": area_sin_registro,
+            }
+            total_horas += area_horas
+            total_faltas += area_faltas
+            total_tardanzas += area_tardanzas
+            total_sin_registro += area_sin_registro
+        elif tipo == "planilla_rango":
+            area_planilla = sum((_decimal(row.get("TotalPlanilla")) for row in group), Decimal("0"))
+            area_destajo = sum((_decimal(row.get("TotalDestajo")) for row in group), Decimal("0"))
+            area_horas = sum((_decimal(row.get("HorasLaboradas")) for row in group), Decimal("0"))
+            by_area[area] = {
+                "registros": len(group),
+                "planilla": area_planilla,
+                "destajo": area_destajo,
+                "horas": area_horas,
+            }
+            total_planilla += area_planilla
+            total_destajo += area_destajo
+            total_horas += area_horas
+        else:
+            area_semaforo: dict[str, int] = defaultdict(int)
+            area_estado: dict[str, int] = defaultdict(int)
+            for row in group:
+                area_semaforo[str(row.get("Semaforo") or "sin dato").lower()] += 1
+                area_estado[str(row.get("Estado") or "sin dato").lower()] += 1
+            by_area[area] = {
+                "registros": len(group),
+                "rojo": area_semaforo.get("rojo", 0),
+                "amarillo": area_semaforo.get("amarillo", 0),
+                "verde": area_semaforo.get("verde", 0),
+                "activos": area_estado.get("activo", 0),
+            }
+
+        for row in group:
+            estados[str(row.get("Estado") or "sin dato").lower()] += 1
+            semaforo[str(row.get("Semaforo") or "sin dato").lower()] += 1
+
+    if tipo == "asistencia_mes_pago":
+        kpis = [
+            ("Contratos", len(rows)),
+            ("Areas", len(areas)),
+            ("Faltas", total_faltas),
+            ("Tardanzas", total_tardanzas),
+            ("Horas", _valor_reporte(total_horas)),
+            ("Sin registro", total_sin_registro),
+        ]
+    elif tipo == "planilla_rango":
+        kpis = [
+            ("Registros", len(rows)),
+            ("Areas", len(areas)),
+            ("Horas", _valor_reporte(total_horas)),
+            ("Planilla total", f"S/ {_money(total_planilla):,.2f}"),
+        ]
+    else:
+        kpis = [
+            ("Registros", len(rows)),
+            ("Areas", len(areas)),
+            ("Rojo", semaforo.get("rojo", 0)),
+            ("Amarillo", semaforo.get("amarillo", 0)),
+            ("Verde", semaforo.get("verde", 0)),
+            ("Activos", estados.get("activo", 0)),
+        ]
+
+    return {
+        "kpis": kpis,
+        "areas": areas,
+        "by_area": by_area,
+        "estados": dict(estados),
+        "semaforo": dict(semaforo),
+        "total_planilla": total_planilla,
+        "total_destajo": total_destajo,
+        "total_horas": total_horas,
+        "total_faltas": total_faltas,
+        "total_tardanzas": total_tardanzas,
+        "total_sin_registro": total_sin_registro,
+    }
+
+
+def _excel_col(index: int) -> str:
+    letters = ""
+    while index:
+        index, remainder = divmod(index - 1, 26)
+        letters = chr(65 + remainder) + letters
+    return letters
+
+
+def _xml_text(value: Any) -> str:
+    text = _valor_reporte(value)
+    text = "".join(char for char in text if char in "\t\n\r" or ord(char) >= 32)
+    return html_lib.escape(text, quote=False)
+
+
+def _xlsx_cell(row: int, col: int, value: Any, style: int = 0) -> str:
+    ref = f"{_excel_col(col)}{row}"
+    style_attr = f' s="{style}"' if style else ""
+    if isinstance(value, (int, float, Decimal)) and not isinstance(value, bool):
+        numeric = format(value, "f") if isinstance(value, Decimal) else str(value)
+        return f'<c r="{ref}"{style_attr}><v>{numeric}</v></c>'
+    return f'<c r="{ref}"{style_attr} t="inlineStr"><is><t xml:space="preserve">{_xml_text(value)}</t></is></c>'
+
+
+def _xlsx_row(row_number: int, values: list[Any], style: int = 0) -> str:
+    cells = "".join(_xlsx_cell(row_number, index + 1, value, style) for index, value in enumerate(values))
+    return f'<row r="{row_number}">{cells}</row>'
+
+
+def _xlsx_worksheet(sheet_rows: list[str], col_count: int) -> str:
+    return f"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheetViews>
+    <sheetView workbookViewId="0"/>
+  </sheetViews>
+  <cols>
+    <col min="1" max="1" width="22" customWidth="1"/>
+    <col min="2" max="{max(2, col_count)}" width="20" customWidth="1"/>
+  </cols>
+  <sheetData>
+    {''.join(sheet_rows)}
+  </sheetData>
+</worksheet>"""
+
+
+def _xlsx_reporte(titulo: str, filtros: list[tuple[str, Any]], columnas: list[tuple[str, str]], rows: list[dict], tipo: str) -> bytes:
+    resumen = _reporte_resumen(rows, tipo)
+    summary_rows: list[str] = []
+    current = 1
+    summary_rows.append(_xlsx_row(current, [f"TPS MAAQ - {titulo}"], 1))
+    current += 1
+    summary_rows.append(_xlsx_row(current, ["Modelo ejecutivo de reporte RRHH"], 0))
+    current += 2
+
+    summary_rows.append(_xlsx_row(current, ["Resumen general"], 2))
+    current += 1
+    for label, value in resumen["kpis"]:
+        summary_rows.append(_xlsx_row(current, [label, value], 5))
+        current += 1
+    current += 1
+
+    summary_rows.append(_xlsx_row(current, ["Filtros aplicados"], 2))
+    current += 1
+    for label, value in filtros:
+        summary_rows.append(_xlsx_row(current, [label, value]))
+        current += 1
+    current += 1
+
+    summary_rows.append(_xlsx_row(current, ["Resumen por area"], 2))
+    current += 1
+    if tipo == "asistencia_mes_pago":
+        summary_rows.append(_xlsx_row(current, ["Area", "Contratos", "Faltas", "Tardanzas", "Horas", "Sin registro"], 3))
+        current += 1
+        for area, data in resumen["by_area"].items():
+            summary_rows.append(_xlsx_row(current, [area, data["registros"], data["faltas"], data["tardanzas"], data["horas"], data["sin_registro"]]))
+            current += 1
+    elif tipo == "planilla_rango":
+        summary_rows.append(_xlsx_row(current, ["Area", "Registros", "Horas", "Destajo", "Planilla"], 3))
+        current += 1
+        for area, data in resumen["by_area"].items():
+            summary_rows.append(_xlsx_row(current, [area, data["registros"], data["horas"], data["destajo"], data["planilla"]]))
+            current += 1
+    else:
+        summary_rows.append(_xlsx_row(current, ["Area", "Registros", "Activos", "Rojo", "Amarillo", "Verde"], 3))
+        current += 1
+        for area, data in resumen["by_area"].items():
+            summary_rows.append(_xlsx_row(current, [area, data["registros"], data["activos"], data["rojo"], data["amarillo"], data["verde"]]))
+            current += 1
+
+    detail_rows: list[str] = []
+    current = 1
+    detail_rows.append(_xlsx_row(current, [f"Detalle - {titulo}"], 1))
+    current += 2
+    if not rows:
+        detail_rows.append(_xlsx_row(current, ["No hay registros para los filtros seleccionados"]))
+    for area, group in _group_reporte_rows(rows):
+        detail_rows.append(_xlsx_row(current, [area.upper(), f"{len(group)} registros"], 4))
+        current += 1
+        detail_rows.append(_xlsx_row(current, [label for _, label in columnas], 3))
+        current += 1
+        for item in group:
+            detail_rows.append(_xlsx_row(current, [item.get(key) for key, _ in columnas]))
+            current += 1
+        current += 1
+
+    summary_sheet = _xlsx_worksheet(summary_rows, 6)
+    detail_sheet = _xlsx_worksheet(detail_rows, len(columnas))
+    buffer = BytesIO()
+    with ZipFile(buffer, "w", ZIP_DEFLATED) as archive:
+        archive.writestr(
+            "[Content_Types].xml",
+            """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>""",
+        )
+        archive.writestr(
+            "_rels/.rels",
+            """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>""",
+        )
+        archive.writestr(
+            "xl/workbook.xml",
+            """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    <sheet name="Resumen" sheetId="1" r:id="rId1"/>
+    <sheet name="Detalle" sheetId="2" r:id="rId2"/>
+  </sheets>
+</workbook>""",
+        )
+        archive.writestr(
+            "xl/_rels/workbook.xml.rels",
+"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>""",
+        )
+        archive.writestr(
+            "xl/styles.xml",
+"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="3"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts>
+  <fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF111827"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFEFF4EA"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0F766E"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF7ED"/><bgColor indexed="64"/></patternFill></fill></fills>
+  <borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFD8DED2"/></left><right style="thin"><color rgb="FFD8DED2"/></right><top style="thin"><color rgb="FFD8DED2"/></top><bottom style="thin"><color rgb="FFD8DED2"/></bottom><diagonal/></border></borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="6"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="2" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="1" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="2" fillId="4" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="0" fontId="0" fillId="5" borderId="1" xfId="0" applyFill="1" applyBorder="1"/></cellXfs>
+</styleSheet>""",
+        )
+        archive.writestr("xl/worksheets/sheet1.xml", summary_sheet)
+        archive.writestr("xl/worksheets/sheet2.xml", detail_sheet)
+    return buffer.getvalue()
+
+
+def _pdf_summary_table(resumen: dict[str, Any], styles: dict[str, ParagraphStyle]) -> Table:
+    cells = [Paragraph(f"<b>{_pdf_text(label)}</b><br/>{_pdf_text(value)}", styles["small"]) for label, value in resumen["kpis"]]
+    rows = [cells[index : index + 3] for index in range(0, len(cells), 3)]
+    while rows and len(rows[-1]) < 3:
+        rows[-1].append(Paragraph("", styles["small"]))
+    table = Table(rows, colWidths=[8.7 * cm, 8.7 * cm, 8.7 * cm], hAlign="LEFT")
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f2f6ef")),
+                ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#d8ded2")),
+                ("INNERGRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#d8ded2")),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 7),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+            ]
+        )
+    )
+    return table
+
+
+def _pdf_area_summary_table(resumen: dict[str, Any], tipo: str, styles: dict[str, ParagraphStyle]) -> Table:
+    if tipo == "asistencia_mes_pago":
+        headers = ["Area", "Contratos", "Faltas", "Tardanzas", "Horas", "Sin registro"]
+        data = [
+            [area, values["registros"], values["faltas"], values["tardanzas"], _valor_reporte(values["horas"]), values["sin_registro"]]
+            for area, values in resumen["by_area"].items()
+        ]
+    elif tipo == "planilla_rango":
+        headers = ["Area", "Registros", "Horas", "Destajo", "Planilla"]
+        data = [
+            [area, values["registros"], _valor_reporte(values["horas"]), _valor_reporte(values["destajo"]), _valor_reporte(values["planilla"])]
+            for area, values in resumen["by_area"].items()
+        ]
+    else:
+        headers = ["Area", "Registros", "Activos", "Rojo", "Amarillo", "Verde"]
+        data = [
+            [area, values["registros"], values["activos"], values["rojo"], values["amarillo"], values["verde"]]
+            for area, values in resumen["by_area"].items()
+        ]
+    table_data = [[Paragraph(f"<b>{_pdf_text(item)}</b>", styles["small"]) for item in headers]]
+    table_data.extend([[Paragraph(_pdf_text(_valor_reporte(item)), styles["small"]) for item in row] for row in data])
+    table = Table(table_data, repeatRows=1, hAlign="LEFT")
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef2ea")),
+                ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#d8ded2")),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 5),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ]
+        )
+    )
+    return table
+
+
+def _pdf_col_widths(tipo: str) -> list[float]:
+    if tipo == "asistencia_mes_pago":
+        return [1.8 * cm, 3.6 * cm, 2.0 * cm, 2.7 * cm, 2.8 * cm, 1.1 * cm, 1.1 * cm, 1.3 * cm, 1.1 * cm, 1.2 * cm, 1.2 * cm, 1.2 * cm, 1.3 * cm, 1.3 * cm, 3.0 * cm]
+    if tipo == "planilla_rango":
+        return [1.8 * cm, 4.2 * cm, 2.0 * cm, 3.5 * cm, 1.4 * cm, 1.7 * cm, 1.7 * cm, 1.8 * cm, 1.8 * cm]
+    return [2.0 * cm, 4.0 * cm, 2.0 * cm, 3.1 * cm, 3.2 * cm, 1.8 * cm, 1.8 * cm, 1.1 * cm, 1.5 * cm, 1.6 * cm]
+
+
+def _pdf_area_header(area: str, count: int, styles: dict[str, ParagraphStyle]) -> Table:
+    table = Table([[Paragraph(f"<b>{_pdf_text(area.upper())}</b>", styles["small"]), Paragraph(f"{count} registros", styles["small"])]], colWidths=[21.5 * cm, 4.5 * cm])
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#0f766e")),
+                ("TEXTCOLOR", (0, 0), (-1, -1), colors.white),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ]
+        )
+    )
+    return table
+
+
+def _pdf_reporte(titulo: str, filtros: list[tuple[str, Any]], columnas: list[tuple[str, str]], rows: list[dict], tipo: str) -> bytes:
+    styles = _pdf_styles()
+    resumen = _reporte_resumen(rows, tipo)
+    story: list[Any] = [
+        _pdf_header(styles),
+        Spacer(1, 0.35 * cm),
+        Paragraph(f"TPS MAAQ - {titulo}", styles["title"]),
+        _p("Modelo ejecutivo de reporte RRHH con resumen, filtros aplicados y detalle agrupado por area.", styles["small"]),
+        Spacer(1, 0.25 * cm),
+        _pdf_summary_table(resumen, styles),
+        Spacer(1, 0.35 * cm),
+        Paragraph("Filtros aplicados", styles["subtitle"]),
+        _info_table([(label, _valor_reporte(value)) for label, value in filtros], styles),
+        Spacer(1, 0.35 * cm),
+        Paragraph("Resumen por area", styles["subtitle"]),
+        _pdf_area_summary_table(resumen, tipo, styles),
+        Spacer(1, 0.45 * cm),
+        Paragraph("Detalle del reporte", styles["subtitle"]),
+    ]
+    if not rows:
+        story.append(_p("No hay registros para los filtros seleccionados.", styles["normal"]))
+    for area, group in _group_reporte_rows(rows):
+        table_data: list[list[Any]] = [[Paragraph(f"<b>{_pdf_text(label)}</b>", styles["small"]) for _, label in columnas]]
+        for item in group:
+            table_data.append([Paragraph(_pdf_text(_valor_reporte(item.get(key))), styles["small"]) for key, _ in columnas])
+        table = LongTable(table_data, colWidths=_pdf_col_widths(tipo), repeatRows=1)
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef2ea")),
+                    ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#d8ded2")),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 3),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 3),
+                    ("TOPPADDING", (0, 0), (-1, -1), 4),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ]
+            )
+        )
+        story.extend([Spacer(1, 0.18 * cm), _pdf_area_header(area, len(group), styles), table])
+    return _pdf_document(story, pagesize=landscape(A4))
+
+
+def _parse_mes_pago(mes_pago: str | None, desde: date | None = None) -> date:
+    if mes_pago:
+        try:
+            year_text, month_text = mes_pago.split("-", 1)
+            year = int(year_text)
+            month = int(month_text)
+            return date(year, month, 1)
+        except ValueError as exc:
+            raise AppError("El mes de pago debe tener formato AAAA-MM", 422, "MES_PAGO_INVALIDO", "mes_pago") from exc
+    if desde:
+        return date(desde.year, desde.month, 1)
+    today_value = date.today()
+    return date(today_value.year, today_value.month, 1)
+
+
+def reporte_asistencia_mes_pago(
+    db: Session,
+    mes_pago: str | None = None,
+    area: str | None = None,
+    estado: str | None = None,
+    q: str | None = None,
+    limit: int = 1000,
+    desde: date | None = None,
+) -> list[dict]:
+    mes_base = _parse_mes_pago(mes_pago, desde)
+    params: dict[str, Any] = {"mes_base": mes_base, "limit": limit}
+    where = ["b.FechaInicio <= b.PeriodoFin", "b.FechaFin >= b.PeriodoInicio"]
+    if area:
+        where.append("b.Area = :area")
+        params["area"] = area
+    if estado:
+        where.append("b.Estado = :estado")
+        params["estado"] = estado
+    if q:
+        where.append(
+            """
+            (
+                b.Empleado LIKE :q
+                OR b.NumeroDocumento LIKE :q
+                OR b.CodigoContrato LIKE :q
+                OR b.Obra LIKE :q
+                OR b.Cargo LIKE :q
+            )
+            """
+        )
+        params["q"] = f"%{q}%"
+
+    return fetch_all(
+        db,
+        f"""
+        WITH contratos AS (
+            SELECT
+                c.IDcontrato,
+                c.CodigoContrato,
+                c.IDempleado,
+                c.NumeroDocumento,
+                c.Empleado,
+                c.Area,
+                c.Obra,
+                c.Cargo,
+                c.FechaInicio,
+                c.FechaFin,
+                c.Estado,
+                periodo.PeriodoInicio,
+                periodo.PeriodoFin
+            FROM dbo.Vista_RRHH_Contratos_Alertas c
+            CROSS APPLY (
+                SELECT
+                    DATEFROMPARTS(
+                        YEAR(:mes_base),
+                        MONTH(:mes_base),
+                        CASE
+                            WHEN DAY(c.FechaInicio) > DAY(EOMONTH(:mes_base)) THEN DAY(EOMONTH(:mes_base))
+                            ELSE DAY(c.FechaInicio)
+                        END
+                    ) AS PeriodoInicio,
+                    DATEFROMPARTS(
+                        YEAR(DATEADD(MONTH, 1, :mes_base)),
+                        MONTH(DATEADD(MONTH, 1, :mes_base)),
+                        CASE
+                            WHEN DAY(c.FechaInicio) > DAY(EOMONTH(DATEADD(MONTH, 1, :mes_base))) THEN DAY(EOMONTH(DATEADD(MONTH, 1, :mes_base)))
+                            ELSE DAY(c.FechaInicio)
+                        END
+                    ) AS PeriodoFin
+            ) periodo
+            WHERE c.Estado <> 'liquidado'
+        ),
+        base AS (
+            SELECT *
+            FROM contratos b
+            WHERE {" AND ".join(where)}
+        )
+        SELECT TOP (:limit)
+            b.IDcontrato,
+            b.CodigoContrato,
+            b.IDempleado,
+            b.NumeroDocumento,
+            b.Empleado,
+            b.Area,
+            b.Obra,
+            b.Cargo,
+            b.FechaInicio,
+            b.FechaFin,
+            b.Estado,
+            b.PeriodoInicio,
+            b.PeriodoFin,
+            CONCAT(CONVERT(varchar(10), b.PeriodoInicio, 23), ' al ', CONVERT(varchar(10), b.PeriodoFin, 23)) AS PeriodoPago,
+            DATEDIFF(DAY, b.PeriodoInicio, b.PeriodoFin) + 1 AS DiasPeriodo,
+            COUNT(a.IDasistencia) AS DiasRegistrados,
+            (DATEDIFF(DAY, b.PeriodoInicio, b.PeriodoFin) + 1) - COUNT(a.IDasistencia) AS DiasSinRegistro,
+            SUM(CASE WHEN a.Estado = 'presente' THEN 1 ELSE 0 END) AS Presentes,
+            SUM(CASE WHEN a.Estado = 'inasistencia' THEN 1 ELSE 0 END) AS Faltas,
+            SUM(CASE WHEN a.Estado = 'tardanza' THEN 1 ELSE 0 END) AS Tardanzas,
+            SUM(CASE WHEN a.Estado = 'descanso' THEN 1 ELSE 0 END) AS Descansos,
+            SUM(CASE WHEN a.Estado = 'permiso' THEN 1 ELSE 0 END) AS Permisos,
+            ISNULL(SUM(a.Horas), 0) AS Horas,
+            ISNULL(SUM(a.Extras), 0) AS Extras,
+            ISNULL(STRING_AGG(CASE WHEN a.Estado = 'inasistencia' THEN CONVERT(varchar(10), a.Fecha, 23) END, ', '), '-') AS FechasFalta
+        FROM base b
+        LEFT JOIN dbo.RRHH_Asistencia a
+            ON a.IDcontrato = b.IDcontrato
+           AND a.Fecha BETWEEN b.PeriodoInicio AND b.PeriodoFin
+        GROUP BY
+            b.IDcontrato,
+            b.CodigoContrato,
+            b.IDempleado,
+            b.NumeroDocumento,
+            b.Empleado,
+            b.Area,
+            b.Obra,
+            b.Cargo,
+            b.FechaInicio,
+            b.FechaFin,
+            b.Estado,
+            b.PeriodoInicio,
+            b.PeriodoFin
+        ORDER BY b.Area ASC, Faltas DESC, b.Empleado ASC
+        """,
+        params,
+    )
+
+
+def reporte_personalizado(
+    db: Session,
+    tipo: str = "contratos",
+    area: str | None = None,
+    estado: str | None = None,
+    desde: date | None = None,
+    hasta: date | None = None,
+    q: str | None = None,
+    dias: int = 30,
+    limit: int = 1000,
+    mes_pago: str | None = None,
+) -> list[dict]:
+    tipo = (tipo or "contratos").strip().lower()
+    params: dict[str, Any] = {"limit": limit, "dias": dias}
+
+    if tipo == "asistencia_mes_pago":
+        return reporte_asistencia_mes_pago(db, mes_pago=mes_pago, area=area, estado=estado, q=q, limit=limit, desde=desde)
+
+    if tipo == "planilla_rango":
+        where = ["1 = 1"]
+        if area:
+            where.append("Area = :area")
+            params["area"] = area
+        if desde:
+            where.append("Fecha >= :desde")
+            params["desde"] = desde
+        if hasta:
+            where.append("Fecha <= :hasta")
+            params["hasta"] = hasta
+        if q:
+            where.append(
+                """
+                (
+                    Empleado LIKE :q
+                    OR NumeroDocumento LIKE :q
+                    OR Obra LIKE :q
+                )
+                """
+            )
+            params["q"] = f"%{q}%"
+        return fetch_all(
+            db,
+            f"""
+            SELECT TOP (:limit)
+                Fecha,
+                IDempleado,
+                NumeroDocumento,
+                Empleado,
+                Area,
+                Obra,
+                HorasLaboradas,
+                Jornal,
+                Extras,
+                TotalDestajo,
+                TotalPlanilla
+            FROM dbo.Vista_RRHH_Planilla_Resumen
+            WHERE {" AND ".join(where)}
+            ORDER BY Fecha DESC, Area ASC, Empleado ASC
+            """,
+            params,
+        )
+
+    where = ["1 = 1"]
+    if tipo == "contratos_activos":
+        where.append("Estado = 'activo'")
+    elif tipo == "contratos_vencidos":
+        where.append("FechaFin < CAST(GETDATE() AS date)")
+    elif tipo == "contratos_por_vencer":
+        where.append("DiasRestantes BETWEEN 0 AND :dias")
+    elif tipo == "ingresantes_rango":
+        where.append("1 = 1")
+    elif tipo == "empleados_area":
+        where.append("1 = 1")
+    elif tipo != "contratos":
+        raise AppError("Tipo de reporte no soportado", 422, "REPORTE_TIPO_INVALIDO", "tipo")
+
+    if area:
+        where.append("Area = :area")
+        params["area"] = area
+    if estado and tipo not in {"contratos_activos"}:
+        where.append("Estado = :estado")
+        params["estado"] = estado
+
+    fecha_columna = "FechaInicio" if tipo in {"ingresantes_rango", "empleados_area"} else "FechaFin"
+    if desde:
+        where.append(f"{fecha_columna} >= :desde")
+        params["desde"] = desde
+    if hasta:
+        where.append(f"{fecha_columna} <= :hasta")
+        params["hasta"] = hasta
+
+    if q:
+        where.append(
+            """
+            (
+                Empleado LIKE :q
+                OR NumeroDocumento LIKE :q
+                OR CodigoContrato LIKE :q
+                OR Obra LIKE :q
+                OR Cargo LIKE :q
+            )
+            """
+        )
+        params["q"] = f"%{q}%"
+
+    return fetch_all(
+        db,
+        f"""
+        SELECT TOP (:limit)
+            IDcontrato,
+            CodigoContrato,
+            IDempleado,
+            NumeroDocumento,
+            Empleado,
+            Area,
+            Obra,
+            Cargo,
+            FechaInicio,
+            FechaFin,
+            SalarioDiario,
+            Estado,
+            FechaLiquidacion,
+            TotalLiquidacion,
+            DiasRestantes,
+            Semaforo
+        FROM dbo.Vista_RRHH_Contratos_Alertas
+        WHERE {" AND ".join(where)}
+        ORDER BY
+            Area ASC,
+            CASE Semaforo WHEN 'rojo' THEN 1 WHEN 'amarillo' THEN 2 WHEN 'verde' THEN 3 ELSE 4 END,
+            FechaFin ASC,
+            Empleado ASC
+        """,
+        params,
+    )
+
+
+def exportar_reporte_personalizado(
+    db: Session,
+    formato: str,
+    tipo: str = "contratos",
+    area: str | None = None,
+    estado: str | None = None,
+    desde: date | None = None,
+    hasta: date | None = None,
+    q: str | None = None,
+    dias: int = 30,
+    limit: int = 1000,
+    mes_pago: str | None = None,
+) -> dict[str, Any]:
+    tipo = (tipo or "contratos").strip().lower()
+    formato = (formato or "excel").strip().lower()
+    rows = reporte_personalizado(db, tipo, area, estado, desde, hasta, q, dias, limit, mes_pago)
+    columnas = _columnas_reporte(tipo, include_area=False)
+    titulo = REPORTE_TITULOS.get(tipo, "Reporte personalizado")
+    filtros = _reporte_filtros(tipo, area, estado, desde, hasta, q, dias, len(rows), mes_pago)
+    slug = tipo.replace("_", "-")
+
+    if formato == "excel":
+        filename = f"reporte-{slug}-maaq.xlsx"
+        content = _xlsx_reporte(titulo, filtros, columnas, rows, tipo)
+        media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    elif formato == "pdf":
+        filename = f"reporte-{slug}-maaq.pdf"
+        content = _pdf_reporte(titulo, filtros, columnas, rows, tipo)
+        media_type = "application/pdf"
+    else:
+        raise AppError("Formato de reporte no soportado", 422, "REPORTE_FORMATO_INVALIDO", "formato")
+
+    _audit(
+        db,
+        "reportes",
+        f"EXPORTAR_{formato.upper()}",
+        "RRHH_Reporte",
+        None,
+        f"Reporte {titulo} exportado en {formato}",
+        {
+            "tipo": tipo,
+            "area": area,
+            "estado": estado,
+            "desde": str(desde) if desde else None,
+            "hasta": str(hasta) if hasta else None,
+            "q": q,
+            "dias": dias,
+            "limit": limit,
+            "mes_pago": mes_pago,
+            "total": len(rows),
+            "filename": filename,
+        },
+    )
+    return {"filename": filename, "content": content, "media_type": media_type}
+
+
 def buscar_empleados(db: Session, q: str) -> list[dict]:
     return fetch_all(
         db,
@@ -867,13 +1831,15 @@ def buscar_empleados(db: Session, q: str) -> list[dict]:
             e.Celular,
             ISNULL(NULLIF(det.Area, ''), 'Sin area') AS Area,
             c.IDcontrato,
+            c.IDproyecto,
             c.CodigoContrato,
-            c.Obra,
+            COALESCE(p.Nombre, c.Obra) AS Obra,
             c.Cargo,
             c.Estado AS EstadoContrato,
             c.FechaFin
         FROM dbo.Empleado e
         LEFT JOIN dbo.RRHH_Contrato c ON e.IDempleado = c.IDempleado
+        LEFT JOIN dbo.Proyecto p ON c.IDproyecto = p.IDproyecto
         OUTER APPLY (
             SELECT TOP 1 Area
             FROM dbo.Detalle_Empleado de
@@ -899,7 +1865,8 @@ def _require_contrato_documento(db: Session, id_contrato: int) -> dict:
             c.IDcontrato,
             c.CodigoContrato,
             c.IDempleado,
-            c.Obra,
+            c.IDproyecto,
+            COALESCE(p.Nombre, c.Obra) AS Obra,
             c.Cargo,
             c.FechaInicio,
             c.FechaFin,
@@ -920,6 +1887,7 @@ def _require_contrato_documento(db: Session, id_contrato: int) -> dict:
         FROM dbo.RRHH_Contrato c
         JOIN dbo.Empleado e ON c.IDempleado = e.IDempleado
         LEFT JOIN dbo.Tipo_Documento td ON e.IDtipoDocumento = td.IDtipoDocumento
+        LEFT JOIN dbo.Proyecto p ON c.IDproyecto = p.IDproyecto
         OUTER APPLY (
             SELECT TOP 1 Area
             FROM dbo.Detalle_Empleado de

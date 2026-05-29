@@ -45,6 +45,12 @@ def contratos(q: str | None = None, db: Session = Depends(get_db)):
     return ok(data, {"total": len(data)})
 
 
+@router.get("/obras")
+def obras(db: Session = Depends(get_db)):
+    data = service.list_obras(db)
+    return ok(data, {"total": len(data)})
+
+
 @router.get("/contratos/alertas")
 def contratos_alertas(dias: int = Query(default=30, ge=1, le=365), db: Session = Depends(get_db)):
     data = service.alertas_contratos(db, dias=dias)
@@ -110,6 +116,68 @@ def planilla(desde: date | None = None, hasta: date | None = None, db: Session =
 @router.get("/reportes/globales")
 def reportes_globales(db: Session = Depends(get_db)):
     return ok(service.reportes_globales(db))
+
+
+@router.get("/reportes/personalizado")
+def reporte_personalizado(
+    tipo: str = Query(default="contratos", max_length=40),
+    area: str | None = Query(default=None, max_length=50),
+    estado: str | None = Query(default=None, max_length=20),
+    desde: date | None = None,
+    hasta: date | None = None,
+    q: str | None = Query(default=None, max_length=80),
+    dias: int = Query(default=30, ge=1, le=365),
+    limit: int = Query(default=1000, ge=1, le=5000),
+    mes_pago: str | None = Query(default=None, max_length=7),
+    db: Session = Depends(get_db),
+):
+    data = service.reporte_personalizado(
+        db,
+        tipo=tipo,
+        area=area,
+        estado=estado,
+        desde=desde,
+        hasta=hasta,
+        q=q,
+        dias=dias,
+        limit=limit,
+        mes_pago=mes_pago,
+    )
+    return ok(data, {"total": len(data), "tipo": tipo})
+
+
+@router.get("/reportes/personalizado/export")
+def exportar_reporte_personalizado(
+    formato: Literal["excel", "pdf"] = Query(default="excel"),
+    tipo: str = Query(default="contratos", max_length=40),
+    area: str | None = Query(default=None, max_length=50),
+    estado: str | None = Query(default=None, max_length=20),
+    desde: date | None = None,
+    hasta: date | None = None,
+    q: str | None = Query(default=None, max_length=80),
+    dias: int = Query(default=30, ge=1, le=365),
+    limit: int = Query(default=1000, ge=1, le=5000),
+    mes_pago: str | None = Query(default=None, max_length=7),
+    db: Session = Depends(get_db),
+):
+    documento = service.exportar_reporte_personalizado(
+        db,
+        formato=formato,
+        tipo=tipo,
+        area=area,
+        estado=estado,
+        desde=desde,
+        hasta=hasta,
+        q=q,
+        dias=dias,
+        limit=limit,
+        mes_pago=mes_pago,
+    )
+    return StreamingResponse(
+        BytesIO(documento["content"]),
+        media_type=documento["media_type"],
+        headers={"Content-Disposition": f'attachment; filename="{documento["filename"]}"'},
+    )
 
 
 @router.get("/buscar")

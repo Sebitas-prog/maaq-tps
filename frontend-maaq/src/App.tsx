@@ -4,6 +4,7 @@ import {
   Building2,
   CalendarClock,
   CheckCircle2,
+  ChevronDown,
   ClipboardCheck,
   Download,
   FileText,
@@ -11,7 +12,6 @@ import {
   LayoutDashboard,
   LogIn,
   LogOut,
-  PlugZap,
   RefreshCw,
   Save,
   Search,
@@ -20,7 +20,7 @@ import {
   Users,
   WalletCards
 } from "lucide-react";
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { API_URL, CatalogItem, Catalogs, api } from "./api";
 
 type Row = Record<string, unknown>;
@@ -43,6 +43,21 @@ type DocumentoGenerado = {
   filename: string;
   html: string;
   data: Row;
+};
+
+type ObraOption = {
+  id?: number | null;
+  IDproyecto?: number | null;
+  NombreObra: string;
+  label: string;
+  Origen?: string;
+  TotalContratos?: number;
+};
+
+type ChartDatum = {
+  label: string;
+  value: number;
+  color?: string;
 };
 
 type LoginResponse = {
@@ -86,7 +101,7 @@ const moduleMenus: Record<ModuleId, Array<{ label: string; detail: string }>> = 
   ],
   reportes: [
     { label: "Personal activo", detail: "Por obra y contrato vigente" },
-    { label: "Planilla total", detail: "Exportacion CSV y PDF" },
+    { label: "Planilla total", detail: "Exportacion Excel y PDF" },
     { label: "Historial", detail: "Cambios auditados" }
   ]
 };
@@ -136,6 +151,7 @@ const emptyContratacion = {
   celular: "",
   id_tipo_empleado: "",
   area: "",
+  id_proyecto: "",
   obra: "",
   cargo: "",
   fecha_inicio: today(),
@@ -182,6 +198,37 @@ const emptyEditEmpleado = {
   area: ""
 };
 
+const emptyReporte = {
+  tipo: "contratos",
+  area: "",
+  estado: "",
+  desde: "",
+  hasta: "",
+  mes_pago: today().slice(0, 7),
+  q: "",
+  dias: "30",
+  limit: "1000"
+};
+
+const reporteTipos = [
+  { value: "contratos", label: "Contratos generales" },
+  { value: "contratos_activos", label: "Contratos activos" },
+  { value: "contratos_vencidos", label: "Contratos vencidos" },
+  { value: "contratos_por_vencer", label: "Contratos por vencer" },
+  { value: "empleados_area", label: "Empleados por area" },
+  { value: "ingresantes_rango", label: "Ingresantes por rango" },
+  { value: "planilla_rango", label: "Planilla por rango" },
+  { value: "asistencia_mes_pago", label: "Asistencia por mes de pago" }
+];
+
+const asistenciaEstados = [
+  { value: "presente", label: "Presente" },
+  { value: "tardanza", label: "Tardanza" },
+  { value: "inasistencia", label: "Falta" },
+  { value: "permiso", label: "Permiso" },
+  { value: "descanso", label: "Descanso" }
+];
+
 const companyFacts = [
   { label: "Organizacion", value: "Constructora MAAQ Arquitectos e Ingenieros S.A.C." },
   { label: "Ubicacion", value: "Tingo Maria, provincia de Leoncio Prado, Peru" },
@@ -208,6 +255,8 @@ const bpmFocus = [
   "Asistencia y destajo integrados a planilla."
 ];
 
+const CHART_COLORS = ["#ff3f62", "#0f766e", "#f59e0b", "#2563eb", "#7c3aed", "#14b8a6", "#ef4444", "#64748b"];
+
 function asNumber(value: string) {
   return Number(value);
 }
@@ -224,6 +273,11 @@ function formatValue(value: unknown) {
   if (value === null || value === undefined || value === "") return "-";
   if (typeof value === "number") return value.toLocaleString("es-PE");
   return String(value);
+}
+
+function numericValue(value: unknown) {
+  const numberValue = Number(value ?? 0);
+  return Number.isFinite(numberValue) ? numberValue : 0;
 }
 
 function countLabel(count: number) {
@@ -248,8 +302,16 @@ function salarioDiarioArea(area: string) {
   return (salarioMensualArea(area) / 30).toFixed(2);
 }
 
+function obraOptionKey(item: ObraOption) {
+  return item.IDproyecto ? `proyecto:${item.IDproyecto}` : `obra:${item.NombreObra}`;
+}
+
 function formatMoney(value: number) {
   return value.toLocaleString("es-PE", { style: "currency", currency: "PEN" });
+}
+
+function shortLabel(value: string, maxLength = 18) {
+  return value.length > maxLength ? `${value.slice(0, maxLength - 1)}...` : value;
 }
 
 function groupRowsByArea(rows: Row[]) {
@@ -264,9 +326,10 @@ function groupRowsByArea(rows: Row[]) {
   });
 }
 
-function Field({ label, children, wide = false }: { label: string; children: ReactNode; wide?: boolean }) {
+function Field({ label, children, wide = false, className = "" }: { label: string; children: ReactNode; wide?: boolean; className?: string }) {
+  const classes = [wide ? "field field--wide" : "field", className].filter(Boolean).join(" ");
   return (
-    <label className={wide ? "field field--wide" : "field"}>
+    <label className={classes}>
       <span>{label}</span>
       {children}
     </label>
@@ -348,42 +411,297 @@ function DataTable({
   );
 }
 
-function GroupedDataTable({
-  columns,
-  rows,
-  empty
+function contractOptionLabel(row: Row) {
+  return `${formatValue(row.CodigoContrato)} - ${formatValue(row.Empleado)} - ${formatValue(row.Obra)}`;
+}
+
+function ContractSearchField({
+  id,
+  label,
+  value,
+  contratos,
+  onChange
 }: {
-  columns: Array<{ key: string; label: string; render?: (row: Row) => ReactNode }>;
-  rows: Row[];
-  empty: string;
+  id: string;
+  label: string;
+  value: string;
+  contratos: Row[];
+  onChange: (idContrato: string) => void;
 }) {
-  if (!rows.length) return <div className="empty">{empty}</div>;
+  const selected = contratos.find((item) => String(item.IDcontrato) === value);
+  const selectedLabel = selected ? contractOptionLabel(selected) : "";
+  const [query, setQuery] = useState(selectedLabel);
+  const lastSelectedLabel = useRef(selectedLabel);
+  const listId = `${id}-options`;
+
+  useEffect(() => {
+    if (selectedLabel) {
+      setQuery(selectedLabel);
+      lastSelectedLabel.current = selectedLabel;
+    } else if (!value && query === lastSelectedLabel.current) {
+      setQuery("");
+      lastSelectedLabel.current = "";
+    }
+  }, [query, selectedLabel, value]);
+
+  function handleQueryChange(nextQuery: string) {
+    setQuery(nextQuery);
+    const exact = contratos.find((item) => contractOptionLabel(item) === nextQuery);
+    onChange(exact ? String(exact.IDcontrato) : "");
+  }
 
   return (
-    <div className="area-group-list">
-      {groupRowsByArea(rows).map(([area, group], index) => (
-        <section className={`area-group area-group--${index % 6}`} key={area}>
-          <div className="area-group__title">
-            <span>{area.toUpperCase()}</span>
-            <small>{group.length} registro{group.length === 1 ? "" : "s"}</small>
+    <Field label={label} wide className="contract-field">
+      <div className="contract-search">
+        <Search size={17} />
+        <input
+          value={query}
+          list={listId}
+          onChange={(event) => handleQueryChange(event.target.value)}
+          placeholder="Escribe codigo, nombre u obra"
+          autoComplete="off"
+          required
+        />
+      </div>
+      <datalist id={listId}>
+        {contratos.map((item) => (
+          <option key={String(item.IDcontrato)} value={contractOptionLabel(item)} />
+        ))}
+      </datalist>
+    </Field>
+  );
+}
+
+function ChartCard({ title, detail, children }: { title: string; detail: string; children: ReactNode }) {
+  return (
+    <article className="chart-card">
+      <header>
+        <div>
+          <span>Analisis</span>
+          <h3>{title}</h3>
+        </div>
+        <p>{detail}</p>
+      </header>
+      {children}
+    </article>
+  );
+}
+
+function BarChart({ data, valueLabel = "registros" }: { data: ChartDatum[]; valueLabel?: string }) {
+  const max = Math.max(...data.map((item) => item.value), 1);
+  if (!data.length) return <div className="empty">No hay datos para graficar</div>;
+  return (
+    <div className="stat-bars">
+      {data.map((item, index) => (
+        <div className="stat-bar-row" key={item.label}>
+          <span title={item.label}>{shortLabel(item.label, 24)}</span>
+          <div>
+            <i style={{ width: `${Math.max((item.value / max) * 100, 2)}%`, background: item.color ?? CHART_COLORS[index % CHART_COLORS.length] }} />
           </div>
-          <DataTable columns={columns} rows={group} empty={empty} />
-        </section>
+          <strong>
+            {valueLabel === "S/" ? `S/ ${formatValue(item.value)}` : `${formatValue(item.value)} ${valueLabel}`}
+          </strong>
+        </div>
       ))}
     </div>
   );
 }
 
-function csvValue(value: unknown) {
-  const text = formatValue(value).replace(/"/g, '""');
-  return `"${text}"`;
+function PieChart({ data }: { data: ChartDatum[] }) {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+
+  if (!total) return <div className="empty">No hay datos para graficar</div>;
+
+  return (
+    <div className="pie-layout">
+      <svg className="pie-chart" viewBox="0 0 120 120" role="img" aria-label="Grafico circular">
+        <circle cx="60" cy="60" r={radius} fill="none" stroke="#edf1ea" strokeWidth="22" />
+        {data.map((item, index) => {
+          const length = (item.value / total) * circumference;
+          const segment = (
+            <circle
+              key={item.label}
+              cx="60"
+              cy="60"
+              r={radius}
+              fill="none"
+              stroke={item.color ?? CHART_COLORS[index % CHART_COLORS.length]}
+              strokeDasharray={`${length} ${circumference - length}`}
+              strokeDashoffset={-offset}
+              strokeLinecap="butt"
+              strokeWidth="22"
+              transform="rotate(-90 60 60)"
+            />
+          );
+          offset += length;
+          return segment;
+        })}
+        <text x="60" y="57" textAnchor="middle" className="pie-chart__total">
+          {formatValue(total)}
+        </text>
+        <text x="60" y="73" textAnchor="middle" className="pie-chart__label">
+          total
+        </text>
+      </svg>
+      <div className="pie-legend">
+        {data.map((item, index) => (
+          <span key={item.label}>
+            <i style={{ background: item.color ?? CHART_COLORS[index % CHART_COLORS.length] }} />
+            {item.label}
+            <strong>{formatValue(item.value)}</strong>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-function downloadCsv(filename: string, rows: Row[]) {
+function LineChart({ data }: { data: ChartDatum[] }) {
+  if (!data.length) return <div className="empty">No hay datos para graficar</div>;
+
+  const width = 340;
+  const height = 190;
+  const paddingX = 34;
+  const paddingY = 24;
+  const max = Math.max(...data.map((item) => item.value), 1);
+  const points = data.map((item, index) => {
+    const x = data.length === 1 ? width / 2 : paddingX + (index * (width - paddingX * 2)) / (data.length - 1);
+    const y = height - paddingY - (item.value / max) * (height - paddingY * 2);
+    return { ...item, x, y };
+  });
+
+  return (
+    <div className="line-chart-wrap">
+      <svg className="line-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Grafico de lineas">
+        <line x1={paddingX} y1={height - paddingY} x2={width - paddingX} y2={height - paddingY} />
+        <line x1={paddingX} y1={paddingY} x2={paddingX} y2={height - paddingY} />
+        <polyline points={points.map((point) => `${point.x},${point.y}`).join(" ")} />
+        {points.map((point) => (
+          <g key={point.label}>
+            <circle cx={point.x} cy={point.y} r="4" />
+            <text x={point.x} y={height - 6} textAnchor="middle">
+              {shortLabel(point.label, 7)}
+            </text>
+            <text x={point.x} y={Math.max(point.y - 9, 12)} textAnchor="middle" className="line-chart__value">
+              {formatValue(point.value)}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function GroupedDataTable({
+  columns,
+  rows,
+  empty,
+  collapsible = false,
+  defaultOpen = true,
+  scrollRows = false,
+  searchable = false,
+  searchPlaceholder = "Buscar"
+}: {
+  columns: Array<{ key: string; label: string; render?: (row: Row) => ReactNode }>;
+  rows: Row[];
+  empty: string;
+  collapsible?: boolean;
+  defaultOpen?: boolean;
+  scrollRows?: boolean;
+  searchable?: boolean;
+  searchPlaceholder?: string;
+}) {
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const [groupSearch, setGroupSearch] = useState<Record<string, string>>({});
+  if (!rows.length) return <div className="empty">{empty}</div>;
+
+  return (
+    <div className={collapsible ? "area-group-list area-group-list--collapsible" : "area-group-list"}>
+      {groupRowsByArea(rows).map(([area, group], index) => {
+        const isOpen = openGroups[area] ?? defaultOpen;
+        const query = groupSearch[area]?.trim().toLowerCase() ?? "";
+        const filteredGroup = searchable && query
+          ? group.filter((row) => String(row.Empleado ?? row.Nombres ?? "").toLowerCase().includes(query))
+          : group;
+        const bodyId = `area-group-${area.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+        return (
+          <section className={`area-group area-group--${index % 6} ${collapsible ? "area-group--collapsible" : ""} ${scrollRows ? "area-group--scroll" : ""}`} key={area}>
+            {collapsible ? (
+              <div className="area-group__title area-group__title--searchable">
+                <button
+                  className="area-group__toggle"
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={bodyId}
+                  onClick={() => setOpenGroups((current) => ({ ...current, [area]: !isOpen }))}
+                >
+                  <span>{area.toUpperCase()}</span>
+                  <small>
+                    {group.length} registro{group.length === 1 ? "" : "s"}
+                  </small>
+                  <ChevronDown className="area-group__chevron" size={18} />
+                </button>
+                {searchable && (
+                  <div className="area-group__search">
+                    <Search size={16} />
+                    <input
+                      aria-label={`Buscar contratos de ${area}`}
+                      placeholder={searchPlaceholder}
+                      value={groupSearch[area] ?? ""}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setGroupSearch((current) => ({ ...current, [area]: value }));
+                        if (!isOpen) setOpenGroups((current) => ({ ...current, [area]: true }));
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="area-group__title">
+                <span>{area.toUpperCase()}</span>
+                <small>
+                  {group.length} registro{group.length === 1 ? "" : "s"}
+                </small>
+              </div>
+            )}
+            {isOpen && (
+              <div id={bodyId} className="area-group__body">
+                <DataTable columns={columns} rows={filteredGroup} empty={query ? "No hay contratos con ese nombre" : empty} />
+              </div>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+function htmlValue(value: unknown) {
+  return formatValue(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function downloadExcel(filename: string, rows: Row[]) {
   if (!rows.length) return;
   const headers = Object.keys(rows[0]);
-  const csv = [headers.join(","), ...rows.map((row) => headers.map((header) => csvValue(row[header])).join(","))].join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const table = [
+    "<table>",
+    `<thead><tr>${headers.map((header) => `<th>${htmlValue(header)}</th>`).join("")}</tr></thead>`,
+    `<tbody>${rows
+      .map((row) => `<tr>${headers.map((header) => `<td>${htmlValue(row[header])}</td>`).join("")}</tr>`)
+      .join("")}</tbody>`,
+    "</table>"
+  ].join("");
+  const html = `<!doctype html><html><head><meta charset="utf-8"></head><body>${table}</body></html>`;
+  const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -396,6 +714,31 @@ function filenameFromDisposition(disposition: string | null, fallback: string) {
   if (!disposition) return fallback;
   const match = disposition.match(/filename="?([^"]+)"?/i);
   return match?.[1] ?? fallback;
+}
+
+async function downloadApiFile(path: string, fallbackFilename: string) {
+  const token = localStorage.getItem("maaq_demo_token");
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+  } catch {
+    throw new Error(`No se pudo conectar con el backend en ${API_URL}. Verifica que uvicorn este ejecutandose en el puerto 8000.`);
+  }
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ error: `Error HTTP ${response.status}` }));
+    throw new Error(payload.error ?? `Error HTTP ${response.status}`);
+  }
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filenameFromDisposition(response.headers.get("Content-Disposition"), fallbackFilename);
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export function App() {
@@ -420,9 +763,12 @@ export function App() {
   const [rrhhReportes, setRrhhReportes] = useState<RrhhReportes>({ personal_activo: [], planilla_total: [], contratos_por_vencer: [] });
   const [rrhhAuditoria, setRrhhAuditoria] = useState<Row[]>([]);
   const [empleados, setEmpleados] = useState<Row[]>([]);
+  const [obras, setObras] = useState<ObraOption[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [resultadosBusqueda, setResultadosBusqueda] = useState<Row[]>([]);
   const [documentoActual, setDocumentoActual] = useState<DocumentoGenerado | null>(null);
+  const [reporteForm, setReporteForm] = useState(emptyReporte);
+  const [reportePersonalizado, setReportePersonalizado] = useState<Row[]>([]);
 
   const [contratacionForm, setContratacionForm] = useState(emptyContratacion);
   const [renovacionForm, setRenovacionForm] = useState({ id_contrato: "", fecha_fin: addDays(60) });
@@ -430,17 +776,203 @@ export function App() {
   const [asistenciaForm, setAsistenciaForm] = useState(emptyAsistencia);
   const [destajoForm, setDestajoForm] = useState(emptyDestajo);
   const [editEmpleadoForm, setEditEmpleadoForm] = useState(emptyEditEmpleado);
+  const [analisisVisible, setAnalisisVisible] = useState(false);
 
   const activeModule = modules.find((item) => item.id === active);
   const activeMenu = moduleMenus[active];
   const contratoOptions = useMemo(() => rrhhContratos.filter((item) => String(item.Estado) !== "liquidado"), [rrhhContratos]);
+  const asistenciaContrato = rrhhContratos.find((item) => String(item.IDcontrato) === asistenciaForm.id_contrato);
+  const destajoContrato = rrhhContratos.find((item) => String(item.IDcontrato) === destajoForm.id_contrato);
+  const obraSeleccionadaKey = contratacionForm.id_proyecto ? `proyecto:${contratacionForm.id_proyecto}` : contratacionForm.obra ? `obra:${contratacionForm.obra}` : "";
+  const usaMesPago = reporteForm.tipo === "asistencia_mes_pago";
+  const reportePersonalizadoColumns =
+    reporteForm.tipo === "asistencia_mes_pago"
+      ? [
+          { key: "CodigoContrato", label: "Contrato" },
+          { key: "Empleado", label: "Empleado" },
+          { key: "NumeroDocumento", label: "Documento" },
+          { key: "Obra", label: "Obra" },
+          { key: "PeriodoPago", label: "Periodo" },
+          { key: "DiasPeriodo", label: "Dias" },
+          { key: "DiasRegistrados", label: "Reg." },
+          { key: "Presentes", label: "Presentes" },
+          { key: "Faltas", label: "Faltas" },
+          { key: "Tardanzas", label: "Tardanzas" },
+          { key: "Descansos", label: "Descansos" },
+          { key: "Permisos", label: "Permisos" },
+          { key: "Horas", label: "Horas" },
+          { key: "Extras", label: "Extras" },
+          { key: "FechasFalta", label: "Fechas falta" }
+        ]
+      : reporteForm.tipo === "planilla_rango"
+      ? [
+          { key: "Fecha", label: "Fecha" },
+          { key: "Empleado", label: "Empleado" },
+          { key: "NumeroDocumento", label: "Documento" },
+          { key: "Obra", label: "Obra" },
+          { key: "HorasLaboradas", label: "Horas" },
+          { key: "Jornal", label: "Jornal" },
+          { key: "Extras", label: "Extras" },
+          { key: "TotalDestajo", label: "Destajo" },
+          { key: "TotalPlanilla", label: "Total" }
+        ]
+      : [
+          { key: "CodigoContrato", label: "Contrato" },
+          { key: "Empleado", label: "Empleado" },
+          { key: "NumeroDocumento", label: "Documento" },
+          { key: "Obra", label: "Obra" },
+          { key: "Cargo", label: "Cargo" },
+          { key: "FechaInicio", label: "Ingreso" },
+          { key: "FechaFin", label: "Fin" },
+          { key: "DiasRestantes", label: "Dias" },
+          { key: "Estado", label: "Estado" },
+          { key: "Semaforo", label: "Semaforo", render: (row: Row) => <SemaforoBadge value={row.Semaforo} /> }
+        ];
+  const reporteTitulo = reporteTipos.find((item) => item.value === reporteForm.tipo)?.label ?? "Reporte personalizado";
+  const reporteResumen = useMemo(() => {
+    const grouped = groupRowsByArea(reportePersonalizado);
+    const semaforo = { rojo: 0, amarillo: 0, verde: 0 };
+    const estados: Record<string, number> = {};
+    let totalPlanilla = 0;
+    let totalDestajo = 0;
+    let totalHoras = 0;
+    let totalFaltas = 0;
+    let totalTardanzas = 0;
+    let totalSinRegistro = 0;
+    const areas = grouped.map(([area, rows]) => {
+      const areaData = { area, registros: rows.length, rojo: 0, amarillo: 0, verde: 0, totalPlanilla: 0, faltas: 0, tardanzas: 0, sinRegistro: 0 };
+      rows.forEach((row) => {
+        const sem = String(row.Semaforo ?? "").toLowerCase();
+        if (sem === "rojo" || sem === "amarillo" || sem === "verde") {
+          semaforo[sem] += 1;
+          areaData[sem] += 1;
+        }
+        const estado = String(row.Estado ?? "sin dato").toLowerCase();
+        estados[estado] = (estados[estado] ?? 0) + 1;
+        const planilla = Number(row.TotalPlanilla ?? 0);
+        const destajo = Number(row.TotalDestajo ?? 0);
+        const horas = Number(row.HorasLaboradas ?? row.Horas ?? 0);
+        const faltas = Number(row.Faltas ?? 0);
+        const tardanzas = Number(row.Tardanzas ?? 0);
+        const sinRegistro = Number(row.DiasSinRegistro ?? 0);
+        totalPlanilla += Number.isFinite(planilla) ? planilla : 0;
+        totalDestajo += Number.isFinite(destajo) ? destajo : 0;
+        totalHoras += Number.isFinite(horas) ? horas : 0;
+        totalFaltas += Number.isFinite(faltas) ? faltas : 0;
+        totalTardanzas += Number.isFinite(tardanzas) ? tardanzas : 0;
+        totalSinRegistro += Number.isFinite(sinRegistro) ? sinRegistro : 0;
+        areaData.totalPlanilla += Number.isFinite(planilla) ? planilla : 0;
+        areaData.faltas += Number.isFinite(faltas) ? faltas : 0;
+        areaData.tardanzas += Number.isFinite(tardanzas) ? tardanzas : 0;
+        areaData.sinRegistro += Number.isFinite(sinRegistro) ? sinRegistro : 0;
+      });
+      return areaData;
+    });
+    return {
+      areas,
+      estados,
+      semaforo,
+      totalPlanilla,
+      totalDestajo,
+      totalHoras,
+      totalFaltas,
+      totalTardanzas,
+      totalSinRegistro
+    };
+  }, [reportePersonalizado]);
+  const reporteKpis =
+    reporteForm.tipo === "asistencia_mes_pago"
+      ? [
+          { label: "Contratos", value: formatValue(reportePersonalizado.length), tone: "rose" },
+          { label: "Areas", value: formatValue(reporteResumen.areas.length), tone: "teal" },
+          { label: "Faltas", value: formatValue(reporteResumen.totalFaltas), tone: "red" },
+          { label: "Tardanzas", value: formatValue(reporteResumen.totalTardanzas), tone: "amber" },
+          { label: "Horas", value: formatValue(Number(reporteResumen.totalHoras.toFixed(2))), tone: "blue" },
+          { label: "Sin registro", value: formatValue(reporteResumen.totalSinRegistro), tone: "green" }
+        ]
+      : reporteForm.tipo === "planilla_rango"
+      ? [
+          { label: "Registros", value: formatValue(reportePersonalizado.length), tone: "rose" },
+          { label: "Areas", value: formatValue(reporteResumen.areas.length), tone: "teal" },
+          { label: "Horas", value: formatValue(Number(reporteResumen.totalHoras.toFixed(2))), tone: "amber" },
+          { label: "Planilla", value: formatMoney(reporteResumen.totalPlanilla), tone: "blue" }
+        ]
+      : [
+          { label: "Registros", value: formatValue(reportePersonalizado.length), tone: "rose" },
+          { label: "Areas", value: formatValue(reporteResumen.areas.length), tone: "teal" },
+          { label: "Rojo", value: formatValue(reporteResumen.semaforo.rojo), tone: "red" },
+          { label: "Amarillo", value: formatValue(reporteResumen.semaforo.amarillo), tone: "amber" },
+          { label: "Verde", value: formatValue(reporteResumen.semaforo.verde), tone: "green" },
+          { label: "Activos", value: formatValue(reporteResumen.estados.activo ?? 0), tone: "blue" }
+        ];
+  const analisisEstadistico = useMemo(() => {
+    const contratosActivos = rrhhContratos.filter((row) => String(row.Estado ?? "").toLowerCase() !== "liquidado");
+    const contratosPorArea = groupRowsByArea(contratosActivos).map(([area, rows], index) => ({
+      label: area,
+      value: rows.length,
+      color: CHART_COLORS[index % CHART_COLORS.length]
+    }));
+
+    const obrasMap = new Map<string, number>();
+    const costoAreaMap = new Map<string, number>();
+    const altasMesMap = new Map<string, number>();
+    const semaforoMap = new Map<string, number>();
+
+    contratosActivos.forEach((row) => {
+      const obra = String(row.Obra ?? "Sin obra");
+      const area = areaLabel(row);
+      const semaforo = String(row.Semaforo ?? "sin dato").toLowerCase();
+      const fechaInicio = String(row.FechaInicio ?? "");
+      const mes = fechaInicio.slice(0, 7);
+      const costoMensual = numericValue(row.SalarioDiario) * 30;
+
+      obrasMap.set(obra, (obrasMap.get(obra) ?? 0) + 1);
+      costoAreaMap.set(area, (costoAreaMap.get(area) ?? 0) + costoMensual);
+      semaforoMap.set(semaforo, (semaforoMap.get(semaforo) ?? 0) + 1);
+      if (/^\d{4}-\d{2}$/.test(mes)) {
+        altasMesMap.set(mes, (altasMesMap.get(mes) ?? 0) + 1);
+      }
+    });
+
+    const contratosPorObra = Array.from(obrasMap.entries())
+      .map(([label, value], index) => ({ label, value, color: CHART_COLORS[index % CHART_COLORS.length] }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+    const costoMensualPorArea = Array.from(costoAreaMap.entries())
+      .map(([label, value], index) => ({ label, value: Math.round(value), color: CHART_COLORS[index % CHART_COLORS.length] }))
+      .sort((a, b) => b.value - a.value);
+    const altasPorMes = Array.from(altasMesMap.entries())
+      .sort(([mesA], [mesB]) => mesA.localeCompare(mesB))
+      .slice(-10)
+      .map(([label, value]) => ({ label, value, color: "#ff3f62" }));
+    const semaforoContratos = ["rojo", "amarillo", "verde", "gris"]
+      .map((label, index) => ({
+        label,
+        value: semaforoMap.get(label) ?? 0,
+        color: ["#be123c", "#f59e0b", "#0f766e", "#6b7280"][index]
+      }))
+      .filter((item) => item.value > 0);
+
+    return {
+      contratosActivos,
+      contratosPorArea,
+      contratosPorObra,
+      costoMensualPorArea,
+      altasPorMes,
+      semaforoContratos,
+      totalCostoMensual: costoMensualPorArea.reduce((sum, item) => sum + item.value, 0),
+      totalObras: obrasMap.size,
+      totalAreas: contratosPorArea.length,
+      personalActivo: new Set(contratosActivos.map((row) => row.IDempleado)).size
+    };
+  }, [rrhhContratos]);
 
   async function refreshAll() {
     if (!authenticated) return;
     setLoading(true);
     setNotice(null);
     try {
-      const [catalogData, dashboardData, contratosData, altasData, planillaData, reportesData, auditoriaData, empleadosData] = await Promise.all([
+      const [catalogData, dashboardData, contratosData, altasData, planillaData, reportesData, auditoriaData, empleadosData, obrasData] = await Promise.all([
         api<Catalogs>("/catalogos"),
         api<RrhhDashboardData>("/rrhh/dashboard"),
         api<Row[]>("/rrhh/contratos"),
@@ -448,7 +980,8 @@ export function App() {
         api<Row[]>("/rrhh/planilla"),
         api<RrhhReportes>("/rrhh/reportes/globales"),
         api<Row[]>("/rrhh/auditoria"),
-        api<Row[]>("/empleados")
+        api<Row[]>("/empleados"),
+        api<ObraOption[]>("/rrhh/obras")
       ]);
       setCatalogs(catalogData);
       setRrhhDashboard(dashboardData);
@@ -458,6 +991,7 @@ export function App() {
       setRrhhReportes(reportesData);
       setRrhhAuditoria(auditoriaData);
       setEmpleados(empleadosData);
+      setObras(obrasData);
       setApiError(null);
     } catch (error) {
       setApiError(error instanceof Error ? error.message : "No se pudo conectar con la API");
@@ -532,12 +1066,25 @@ export function App() {
     });
   }
 
+  function selectObraContratacion(value: string) {
+    const selected = obras.find((item) => obraOptionKey(item) === value);
+    setContratacionForm((current) => ({
+      ...current,
+      id_proyecto: selected?.IDproyecto ? String(selected.IDproyecto) : "",
+      obra: selected?.NombreObra ?? ""
+    }));
+  }
+
   function updateAsistencia(key: keyof typeof asistenciaForm, value: string) {
     setAsistenciaForm((current) => ({ ...current, [key]: value }));
   }
 
   function updateDestajo(key: keyof typeof destajoForm, value: string) {
     setDestajoForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateReporte(key: keyof typeof reporteForm, value: string) {
+    setReporteForm((current) => ({ ...current, [key]: value }));
   }
 
   function selectContrato(idContrato: string, target: "asistencia" | "destajo") {
@@ -556,6 +1103,10 @@ export function App() {
 
   async function saveContratacion(event: FormEvent) {
     event.preventDefault();
+    const confirmar = window.confirm(
+      `Confirma la contratacion de ${contratacionForm.nombres} ${contratacionForm.apellido_paterno} para la obra ${contratacionForm.obra}?`
+    );
+    if (!confirmar) return;
     await submit("contratacion", async () => {
       await api("/rrhh/contratacion", {
         method: "POST",
@@ -569,6 +1120,7 @@ export function App() {
           celular: contratacionForm.celular,
           id_tipo_empleado: optionalNumber(contratacionForm.id_tipo_empleado),
           area: optionalText(contratacionForm.area),
+          id_proyecto: optionalNumber(contratacionForm.id_proyecto),
           obra: contratacionForm.obra,
           cargo: contratacionForm.cargo,
           fecha_inicio: contratacionForm.fecha_inicio,
@@ -597,6 +1149,11 @@ export function App() {
 
   async function liquidarContrato(idContrato: unknown) {
     if (!idContrato) return;
+    const contrato = rrhhContratos.find((item) => String(item.IDcontrato) === String(idContrato));
+    const confirmar = window.confirm(
+      `Confirma liquidar el contrato ${formatValue(contrato?.CodigoContrato ?? idContrato)} de ${formatValue(contrato?.Empleado)}? Esta accion cambiara el estado del contrato.`
+    );
+    if (!confirmar) return;
     await submit("liquidacion", async () => {
       await api(`/rrhh/contratos/${idContrato}/liquidar`, { method: "POST" });
     });
@@ -689,6 +1246,10 @@ export function App() {
 
   async function saveAsistencia(event: FormEvent) {
     event.preventDefault();
+    if (!asistenciaForm.id_contrato) {
+      setApiError("Selecciona un contrato valido para registrar asistencia");
+      return;
+    }
     await submit("asistencia", async () => {
       await api("/rrhh/asistencia", {
         method: "POST",
@@ -709,6 +1270,10 @@ export function App() {
 
   async function saveDestajo(event: FormEvent) {
     event.preventDefault();
+    if (!destajoForm.id_contrato) {
+      setApiError("Selecciona un contrato valido para registrar destajo");
+      return;
+    }
     await submit("destajo", async () => {
       await api("/rrhh/destajo", {
         method: "POST",
@@ -734,6 +1299,55 @@ export function App() {
       const data = await api<Row[]>(`/rrhh/buscar?q=${encodeURIComponent(busqueda.trim())}`);
       setResultadosBusqueda(data);
     });
+  }
+
+  function reporteParams() {
+    const params = new URLSearchParams();
+    params.set("tipo", reporteForm.tipo);
+    if (reporteForm.area) params.set("area", reporteForm.area);
+    if (reporteForm.estado) params.set("estado", reporteForm.estado);
+    if (reporteForm.desde) params.set("desde", reporteForm.desde);
+    if (reporteForm.hasta) params.set("hasta", reporteForm.hasta);
+    if (reporteForm.mes_pago) params.set("mes_pago", reporteForm.mes_pago);
+    if (reporteForm.q.trim()) params.set("q", reporteForm.q.trim());
+    if (reporteForm.dias) params.set("dias", reporteForm.dias);
+    if (reporteForm.limit) params.set("limit", reporteForm.limit);
+    return params;
+  }
+
+  async function generarReporte(event: FormEvent) {
+    event.preventDefault();
+    setSaving("reporte-personalizado");
+    setNotice(null);
+    setApiError(null);
+    try {
+      const data = await api<Row[]>(`/rrhh/reportes/personalizado?${reporteParams().toString()}`);
+      setReportePersonalizado(data);
+      setNotice(`Reporte generado: ${countLabel(data.length)}`);
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : "No se pudo generar el reporte");
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  async function descargarReportePersonalizado(formato: "excel" | "pdf") {
+    const params = reporteParams();
+    params.set("formato", formato);
+    setSaving(`reporte-${formato}`);
+    setNotice(null);
+    setApiError(null);
+    try {
+      await downloadApiFile(
+        `/rrhh/reportes/personalizado/export?${params.toString()}`,
+        formato === "excel" ? "reporte-personalizado-maaq.xlsx" : "reporte-personalizado-maaq.pdf"
+      );
+      setNotice(`Reporte descargado en ${formato === "excel" ? "Excel" : "PDF"}`);
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : "No se pudo descargar el reporte");
+    } finally {
+      setSaving(null);
+    }
   }
 
   function cargarEdicion(row: Row) {
@@ -916,26 +1530,20 @@ export function App() {
             </button>
           ))}
         </nav>
+        <div className="nav-actions">
+          <button className="nav-action-button" onClick={refreshAll} disabled={loading} title="Actualizar datos">
+            <RefreshCw size={18} />
+          </button>
+          <button className="nav-action-button" onClick={logout} title="Cerrar sesion">
+            <LogOut size={18} />
+          </button>
+        </div>
       </aside>
 
       <main className="main">
         <header className="topbar">
           <div>
-            <p className="eyebrow">API {API_URL}</p>
             <h1>{activeModule?.label}</h1>
-          </div>
-          <div className="topbar__actions">
-            <span className="status status--user">{formatValue(usuario?.nombre ?? "Demo")}</span>
-            <span className={apiError ? "status status--error" : "status"}>
-              <PlugZap size={16} />
-              {apiError ? "Sin conexion" : "Conectado"}
-            </span>
-            <button className="icon-button" onClick={refreshAll} disabled={loading} title="Actualizar datos">
-              <RefreshCw size={18} />
-            </button>
-            <button className="icon-button" onClick={logout} title="Cerrar sesion">
-              <LogOut size={18} />
-            </button>
           </div>
         </header>
 
@@ -1093,7 +1701,14 @@ export function App() {
                     </select>
                   </Field>
                   <Field label="Obra">
-                    <input value={contratacionForm.obra} onChange={(e) => updateContratacion("obra", e.target.value)} required maxLength={100} />
+                    <select value={obraSeleccionadaKey} onChange={(e) => selectObraContratacion(e.target.value)} required>
+                      <option value="">Seleccionar obra</option>
+                      {obras.map((obra) => (
+                        <option key={obraOptionKey(obra)} value={obraOptionKey(obra)}>
+                          {obra.label}
+                        </option>
+                      ))}
+                    </select>
                   </Field>
                   <Field label="Cargo">
                     <input value={contratacionForm.cargo} onChange={(e) => updateContratacion("cargo", e.target.value)} required maxLength={80} />
@@ -1244,14 +1859,14 @@ export function App() {
                         label: "Acciones",
                         render: (row) => (
                           <div className="row-actions">
-                            <button className="ghost ghost--compact" type="button" onClick={() => abrirDocumento(`/rrhh/contratos/${row.IDcontrato}/documentos/contrato`)}>
+                            <button className="ghost ghost--compact action-button action-button--green" type="button" onClick={() => abrirDocumento(`/rrhh/contratos/${row.IDcontrato}/documentos/contrato`)}>
                               Contrato
                             </button>
-                            <button className="ghost ghost--compact" type="button" onClick={() => abrirDocumento(`/rrhh/contratos/${row.IDcontrato}/documentos/certificado`)}>
+                            <button className="ghost ghost--compact action-button action-button--green" type="button" onClick={() => abrirDocumento(`/rrhh/contratos/${row.IDcontrato}/documentos/certificado`)}>
                               Certificado
                             </button>
                             <button
-                              className="ghost ghost--compact"
+                              className="ghost ghost--compact action-button action-button--yellow"
                               type="button"
                               onClick={() =>
                                 abrirDocumento(
@@ -1261,7 +1876,7 @@ export function App() {
                             >
                               Boleta
                             </button>
-                            <button className="ghost ghost--compact" type="button" onClick={() => liquidarContrato(row.IDcontrato)} disabled={String(row.Estado) === "liquidado"}>
+                            <button className="ghost ghost--compact action-button action-button--red" type="button" onClick={() => liquidarContrato(row.IDcontrato)} disabled={String(row.Estado) === "liquidado"}>
                               Liquidar
                             </button>
                           </div>
@@ -1270,6 +1885,11 @@ export function App() {
                     ]}
                     rows={rrhhContratos}
                     empty="No hay contratos registrados"
+                    collapsible
+                    defaultOpen={false}
+                    scrollRows
+                    searchable
+                    searchPlaceholder="Buscar por nombre"
                   />
                 </section>
                 <section className="surface">
@@ -1292,46 +1912,39 @@ export function App() {
 
             {active === "asistencia" && (
               <section className="section-grid">
-                <div className="split">
-                  <form className="surface form-grid" onSubmit={saveAsistencia}>
+                <div className="split attendance-split">
+                  <form className="surface form-grid work-form" onSubmit={saveAsistencia}>
                     <div className="form-title">
-                      <h2>Registrar asistencia</h2>
+                      <div>
+                        <h2>Registrar asistencia</h2>
+                        <p className="form-help">Busca el contrato y el sistema completa empleado y obra.</p>
+                      </div>
                     </div>
-                    <Field label="Contrato" wide>
-                      <select value={asistenciaForm.id_contrato} onChange={(e) => selectContrato(e.target.value, "asistencia")}>
-                        <option value="">Seleccionar contrato</option>
-                        {contratoOptions.map((item) => (
-                          <option key={String(item.IDcontrato)} value={String(item.IDcontrato)}>
-                            {formatValue(item.CodigoContrato)} - {formatValue(item.Empleado)}
-                          </option>
-                        ))}
-                      </select>
+                    <ContractSearchField id="asistencia-contrato" label="Contrato" value={asistenciaForm.id_contrato} contratos={contratoOptions} onChange={(idContrato) => selectContrato(idContrato, "asistencia")} />
+                    <Field label="Empleado" className="field--readonly">
+                      <input value={String(asistenciaContrato?.Empleado ?? "")} placeholder="Se completa con el contrato" readOnly />
                     </Field>
-                    <Field label="Empleado">
-                      <select value={asistenciaForm.id_empleado} onChange={(e) => updateAsistencia("id_empleado", e.target.value)} required>
-                        <option value="">Seleccionar</option>
-                        {empleados.map((item) => (
-                          <option key={String(item.IDempleado)} value={String(item.IDempleado)}>
-                            {formatValue(item.Nombres)} {formatValue(item.ApellidoPaterno)}
-                          </option>
-                        ))}
-                      </select>
+                    <Field label="Obra" className="field--readonly">
+                      <input value={asistenciaForm.obra} placeholder="Se completa con el contrato" readOnly />
                     </Field>
                     <Field label="Fecha">
                       <input value={asistenciaForm.fecha} onChange={(e) => updateAsistencia("fecha", e.target.value)} type="date" required />
                     </Field>
-                    <Field label="Obra">
-                      <input value={asistenciaForm.obra} onChange={(e) => updateAsistencia("obra", e.target.value)} required maxLength={100} />
-                    </Field>
-                    <Field label="Estado">
-                      <select value={asistenciaForm.estado} onChange={(e) => updateAsistencia("estado", e.target.value)} required>
-                        <option value="presente">Presente</option>
-                        <option value="tardanza">Tardanza</option>
-                        <option value="inasistencia">Inasistencia</option>
-                        <option value="permiso">Permiso</option>
-                        <option value="descanso">Descanso</option>
-                      </select>
-                    </Field>
+                    <div className="field field--wide">
+                      <span>Estado</span>
+                      <div className="status-choice" role="group" aria-label="Estado de asistencia">
+                        {asistenciaEstados.map((item) => (
+                          <button
+                            key={item.value}
+                            type="button"
+                            className={asistenciaForm.estado === item.value ? "active" : ""}
+                            onClick={() => updateAsistencia("estado", item.value)}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <Field label="Horas">
                       <input value={asistenciaForm.horas} onChange={(e) => updateAsistencia("horas", e.target.value)} type="number" min="0" max="24" step="0.01" required />
                     </Field>
@@ -1349,35 +1962,22 @@ export function App() {
                     </div>
                   </form>
 
-                  <form className="surface form-grid" onSubmit={saveDestajo}>
+                  <form className="surface form-grid work-form" onSubmit={saveDestajo}>
                     <div className="form-title">
-                      <h2>Ingresar destajo</h2>
+                      <div>
+                        <h2>Ingresar destajo</h2>
+                        <p className="form-help">Contrato buscable, datos de empleado y obra bloqueados.</p>
+                      </div>
                     </div>
-                    <Field label="Contrato" wide>
-                      <select value={destajoForm.id_contrato} onChange={(e) => selectContrato(e.target.value, "destajo")}>
-                        <option value="">Seleccionar contrato</option>
-                        {contratoOptions.map((item) => (
-                          <option key={String(item.IDcontrato)} value={String(item.IDcontrato)}>
-                            {formatValue(item.CodigoContrato)} - {formatValue(item.Empleado)}
-                          </option>
-                        ))}
-                      </select>
+                    <ContractSearchField id="destajo-contrato" label="Contrato" value={destajoForm.id_contrato} contratos={contratoOptions} onChange={(idContrato) => selectContrato(idContrato, "destajo")} />
+                    <Field label="Empleado" className="field--readonly">
+                      <input value={String(destajoContrato?.Empleado ?? "")} placeholder="Se completa con el contrato" readOnly />
                     </Field>
-                    <Field label="Empleado">
-                      <select value={destajoForm.id_empleado} onChange={(e) => updateDestajo("id_empleado", e.target.value)} required>
-                        <option value="">Seleccionar</option>
-                        {empleados.map((item) => (
-                          <option key={String(item.IDempleado)} value={String(item.IDempleado)}>
-                            {formatValue(item.Nombres)} {formatValue(item.ApellidoPaterno)}
-                          </option>
-                        ))}
-                      </select>
+                    <Field label="Obra" className="field--readonly">
+                      <input value={destajoForm.obra} placeholder="Se completa con el contrato" readOnly />
                     </Field>
                     <Field label="Fecha">
                       <input value={destajoForm.fecha} onChange={(e) => updateDestajo("fecha", e.target.value)} type="date" required />
-                    </Field>
-                    <Field label="Obra">
-                      <input value={destajoForm.obra} onChange={(e) => updateDestajo("obra", e.target.value)} required maxLength={100} />
                     </Field>
                     <Field label="Partida">
                       <input value={destajoForm.partida} onChange={(e) => updateDestajo("partida", e.target.value)} required maxLength={120} />
@@ -1403,9 +2003,9 @@ export function App() {
                 <section className="surface">
                   <div className="surface-head">
                     <h2>Planilla generada</h2>
-                    <button className="ghost" onClick={() => downloadCsv("planilla-maaq.csv", rrhhPlanilla)}>
+                    <button className="ghost" onClick={() => downloadExcel("planilla-maaq.xls", rrhhPlanilla)}>
                       <Download size={16} />
-                      Exportar CSV
+                      Exportar Excel
                     </button>
                   </div>
                   <GroupedDataTable
@@ -1428,13 +2028,189 @@ export function App() {
 
             {active === "reportes" && (
               <section className="section-grid">
+                <form className="surface form-grid report-builder" onSubmit={generarReporte}>
+                  <div className="form-title">
+                    <div>
+                      <h2>Generador de reportes</h2>
+                      <p className="form-help">Filtra por tipo de reporte, area, fechas, estado o busqueda libre.</p>
+                    </div>
+                  </div>
+                  <Field label="Tipo de reporte">
+                    <select value={reporteForm.tipo} onChange={(e) => updateReporte("tipo", e.target.value)}>
+                      {reporteTipos.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Area">
+                    <select value={reporteForm.area} onChange={(e) => updateReporte("area", e.target.value)}>
+                      <option value="">Todas</option>
+                      {AREA_OPTIONS.map((area) => (
+                        <option key={area} value={area}>
+                          {area}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Estado">
+                    <select value={reporteForm.estado} onChange={(e) => updateReporte("estado", e.target.value)}>
+                      <option value="">Todos</option>
+                      <option value="activo">Activo</option>
+                      <option value="renovado">Renovado</option>
+                      <option value="liquidado">Liquidado</option>
+                    </select>
+                  </Field>
+                  {usaMesPago ? (
+                    <Field label="Mes de pago">
+                      <input value={reporteForm.mes_pago} onChange={(e) => updateReporte("mes_pago", e.target.value)} type="month" />
+                    </Field>
+                  ) : (
+                    <>
+                      <Field label="Desde">
+                        <input value={reporteForm.desde} onChange={(e) => updateReporte("desde", e.target.value)} type="date" />
+                      </Field>
+                      <Field label="Hasta">
+                        <input value={reporteForm.hasta} onChange={(e) => updateReporte("hasta", e.target.value)} type="date" />
+                      </Field>
+                    </>
+                  )}
+                  {!usaMesPago && (
+                    <Field label="Dias alerta">
+                      <input value={reporteForm.dias} onChange={(e) => updateReporte("dias", e.target.value)} type="number" min="1" max="365" />
+                    </Field>
+                  )}
+                  <Field label="Limite">
+                    <input value={reporteForm.limit} onChange={(e) => updateReporte("limit", e.target.value)} type="number" min="1" max="5000" />
+                  </Field>
+                  <Field label="Buscar" wide>
+                    <input value={reporteForm.q} onChange={(e) => updateReporte("q", e.target.value)} placeholder="Nombre, DNI, contrato, obra o cargo" maxLength={80} />
+                  </Field>
+                  <div className="form-actions report-builder__actions">
+                    <button className="primary" disabled={saving === "reporte-personalizado"}>
+                      <Search size={17} />
+                      Generar reporte
+                    </button>
+                    <button className="ghost" type="button" onClick={() => descargarReportePersonalizado("excel")} disabled={!reportePersonalizado.length || saving === "reporte-excel"}>
+                      <Download size={16} />
+                      Excel
+                    </button>
+                    <button className="ghost" type="button" onClick={() => descargarReportePersonalizado("pdf")} disabled={!reportePersonalizado.length || saving === "reporte-pdf"}>
+                      <FileText size={16} />
+                      PDF
+                    </button>
+                    <button className={analisisVisible ? "primary" : "ghost"} type="button" onClick={() => setAnalisisVisible((current) => !current)}>
+                      <LayoutDashboard size={16} />
+                      ANALISIS ESTADISTICO
+                    </button>
+                  </div>
+                </form>
+
+                {analisisVisible && (
+                  <section className="surface analytics-panel">
+                    <div className="surface-head">
+                      <div>
+                        <h2>Analisis estadistico</h2>
+                        <p className="form-help">Resumen visual de contratos activos, obras, alertas y costos mensuales estimados.</p>
+                      </div>
+                      <span className="report-count">{countLabel(analisisEstadistico.contratosActivos.length)}</span>
+                    </div>
+                    <div className="analytics-kpi-grid">
+                      <article>
+                        <span>Personal activo</span>
+                        <strong>{formatValue(analisisEstadistico.personalActivo)}</strong>
+                      </article>
+                      <article>
+                        <span>Areas con personal</span>
+                        <strong>{formatValue(analisisEstadistico.totalAreas)}</strong>
+                      </article>
+                      <article>
+                        <span>Obras activas</span>
+                        <strong>{formatValue(analisisEstadistico.totalObras)}</strong>
+                      </article>
+                      <article>
+                        <span>Costo mensual estimado</span>
+                        <strong>{formatMoney(analisisEstadistico.totalCostoMensual)}</strong>
+                      </article>
+                    </div>
+                    <div className="chart-grid">
+                      <ChartCard title="Contratos por area" detail="Grafico de barras para comparar la carga de personal por departamento.">
+                        <BarChart data={analisisEstadistico.contratosPorArea} />
+                      </ChartCard>
+                      <ChartCard title="Semaforo de contratos" detail="Grafico circular segun estado de vencimiento y alerta.">
+                        <PieChart data={analisisEstadistico.semaforoContratos} />
+                      </ChartCard>
+                      <ChartCard title="Altas por mes" detail="Grafico de lineas con la evolucion de ingresos de personal.">
+                        <LineChart data={analisisEstadistico.altasPorMes} />
+                      </ChartCard>
+                      <ChartCard title="Contratos por obra" detail="Ranking de obras con mayor cantidad de trabajadores asignados.">
+                        <BarChart data={analisisEstadistico.contratosPorObra} />
+                      </ChartCard>
+                      <ChartCard title="Costo mensual por area" detail="Estimacion calculada desde el jornal diario registrado en cada contrato activo.">
+                        <BarChart data={analisisEstadistico.costoMensualPorArea} valueLabel="S/" />
+                      </ChartCard>
+                    </div>
+                  </section>
+                )}
+
+                <section className="surface report-surface">
+                  <div className="surface-head">
+                    <h2>Resultado del reporte</h2>
+                    <span className="report-count">{countLabel(reportePersonalizado.length)}</span>
+                  </div>
+                  {reportePersonalizado.length > 0 && (
+                    <div className="report-model">
+                      <div className="report-model__cover">
+                        <span>Modelo de reporte</span>
+                        <h3>{reporteTitulo}</h3>
+                        <p>Resumen ejecutivo, filtros aplicados y detalle operativo agrupado por area.</p>
+                      </div>
+                      <div className="report-kpi-grid">
+                        {reporteKpis.map((item) => (
+                          <article className={`report-kpi report-kpi--${item.tone}`} key={`${item.label}-${item.value}`}>
+                            <span>{item.label}</span>
+                            <strong>{item.value}</strong>
+                          </article>
+                        ))}
+                      </div>
+                      <div className="report-filter-strip">
+                        <span>Area: <strong>{reporteForm.area || "Todas"}</strong></span>
+                        <span>Estado: <strong>{reporteForm.estado || "Todos"}</strong></span>
+                        <span>Desde: <strong>{reporteForm.desde || "-"}</strong></span>
+                        <span>Hasta: <strong>{reporteForm.hasta || "-"}</strong></span>
+                        <span>Mes: <strong>{usaMesPago ? reporteForm.mes_pago : "-"}</strong></span>
+                        <span>Busqueda: <strong>{reporteForm.q || "-"}</strong></span>
+                      </div>
+                      <div className="report-area-summary">
+                        {reporteResumen.areas.slice(0, 8).map((area) => (
+                          <span key={area.area}>
+                            {area.area}
+                            <strong>{countLabel(area.registros)}</strong>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <GroupedDataTable
+                    columns={reportePersonalizadoColumns}
+                    rows={reportePersonalizado}
+                    empty="Genera un reporte para ver resultados"
+                    collapsible={reportePersonalizado.length > 80}
+                    defaultOpen
+                    scrollRows={reportePersonalizado.length > 80}
+                    searchable={reportePersonalizado.length > 80}
+                    searchPlaceholder="Filtrar por nombre"
+                  />
+                </section>
+
                 <section className="surface action-panel">
                   <div className="surface-head">
                     <h2>Acciones disponibles</h2>
                     <div className="inline-actions">
-                      <button className="ghost" onClick={() => downloadCsv("personal-activo-maaq.csv", rrhhReportes.personal_activo)}>
+                      <button className="ghost" onClick={() => downloadExcel("personal-activo-maaq.xls", rrhhReportes.personal_activo)}>
                         <Download size={16} />
-                        Excel CSV
+                        Excel
                       </button>
                       <button className="ghost" onClick={() => window.print()}>
                         <FileText size={16} />
@@ -1461,7 +2237,7 @@ export function App() {
                     <article>
                       <Download size={18} />
                       <span>Exportar datos</span>
-                      <strong>PDF / CSV</strong>
+                      <strong>PDF / Excel</strong>
                     </article>
                   </div>
                 </section>

@@ -15,6 +15,7 @@ class ContratacionCreate(BaseModel):
     celular: str = Field(min_length=6, max_length=20)
     id_tipo_empleado: int | None = Field(default=None, gt=0)
     area: str | None = Field(default=None, max_length=50)
+    id_proyecto: int | None = Field(default=None, gt=0)
     obra: str = Field(min_length=1, max_length=100)
     cargo: str = Field(min_length=1, max_length=80)
     fecha_inicio: date
